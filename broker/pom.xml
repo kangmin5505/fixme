@@ -12,18 +12,6 @@
     <mainClass>${project.groupId}.Broker</mainClass>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>kr._42.seoul</groupId>
-      <artifactId>router</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
-
   <artifactId>broker</artifactId>
 
-  <build>
-    <finalName>${project.artifactId}</finalName>
-  </build>
 </project>
