@@ -1,7 +1,6 @@
 package kr._42.seoul;
 
 import kr._42.seoul.client.BrokerClient;
-import kr._42.seoul.client.OldBrokerClient;
 import kr._42.seoul.parser.ParameterParser;
 
 public class Broker {
@@ -18,34 +17,14 @@ public class Broker {
            exit();
         }
 
-
-
-
         try (BrokerClient brokerClient = BrokerClient.open(HOSTNAME, PORT)) {
-            brokerClient.setupForRequest();
+            brokerClient.setup();
             String response = brokerClient.request();
-            System.out.println(response);
+
+            System.out.println("RESPONSE: " + response);
         } catch (RuntimeException e) {
             error(e.getMessage());
         }
-
-        try (OldBrokerClient oldBrokerClient = OldBrokerClient.open(HOSTNAME, PORT)) {
-            oldBrokerClient.setupForSelector();
-            oldBrokerClient.process();
-        } catch (RuntimeException e) {
-            error(e.getMessage());
-        }
-
-
-//        BrokerClient brokerClient = new BrokerClient(HOSTNAME, PORT);
-//
-//        try {
-//            brokerClient.open();
-//            brokerClient.receiveID();
-//            String response = brokerClient.sendMessage(paramParser);
-//        } catch (IOException e) {
-//            error(e.getMessage());
-//        }
     }
 
     private static void usage() {

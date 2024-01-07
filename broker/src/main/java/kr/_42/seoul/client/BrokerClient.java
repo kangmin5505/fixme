@@ -1,19 +1,19 @@
 package kr._42.seoul.client;
 
+import kr._42.seoul.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 public class BrokerClient implements AutoCloseable {
+    private static final int BUFFER_CAPACITY = 1024;
     private static final Logger logger = LoggerFactory.getLogger(BrokerClient.class);
-    private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private SocketChannel socket;
+    private ByteBuffer buffer;
     private String id;
 
     private BrokerClient() {}
@@ -22,13 +22,14 @@ public class BrokerClient implements AutoCloseable {
     public static BrokerClient open(String hostname, int port) {
         logger.debug("Try to connect server({}:{})", hostname, port);
 
+        BrokerClient brokerClient = new BrokerClient();
         try {
-            BrokerClient brokerClient = new BrokerClient();
-            brokerClient.socket = new Socket(hostname, port);
+            brokerClient.socket = SocketChannel.open(new InetSocketAddress(hostname, port));
 
+            logger.debug("Success to connect server({})", brokerClient.socket);
             return brokerClient;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Fail to open socket channel");
         }
     }
 
@@ -37,33 +38,19 @@ public class BrokerClient implements AutoCloseable {
     public void close() {
         logger.debug("Try to close broker client");
 
-        try {
-            if (this.in != null) {
-                this.in.close();
-            }
-        } catch (IOException ignored) {}
-
-        if (this.out != null) {
-            this.out.close();
-        }
-
-        try {
-            if (this.socket != null) {
-                this.socket.close();
-            }
-        } catch (IOException ignored) {}
-
+        CommonUtils.close(this.socket);
     }
 
-    public void setupForRequest() {
+    public void setup() {
         logger.debug("Try to setup for request");
 
         try {
-            this.out = new PrintWriter(this.socket.getOutputStream(), true);
-            this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            this.id = this.in.readLine();
+            this.buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
+            this.socket.read(this.buffer);
+            this.id = new String(this.buffer.array()).trim();
+            this.buffer.clear();
 
-            logger.debug("Broker client id is {}", this.id);
+            logger.debug("Success to setup for request with id {}", this.id);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -72,10 +59,15 @@ public class BrokerClient implements AutoCloseable {
     public String request() {
         logger.debug("Try to request message");
 
-        this.out.println("I want to buy something at A market");
-
         try {
-            return this.in.readLine();
+            // request
+            this.buffer = ByteBuffer.wrap(this.id.getBytes());
+            this.socket.write(this.buffer);
+            this.buffer.clear();
+
+            // response
+            this.socket.read(this.buffer);
+            return new String(this.buffer.array()).trim();
         } catch (IOException e) {
             throw new RuntimeException("Fail to receive response from server");
         }
