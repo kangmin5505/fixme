@@ -4,5 +4,7 @@ public enum Command {
     BUY,
     SELL,
     MARKETS,
-    MARKET
+    MARKET,
+    EXIT;
+
 }

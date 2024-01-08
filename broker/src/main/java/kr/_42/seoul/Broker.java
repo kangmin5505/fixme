@@ -1,45 +1,81 @@
 package kr._42.seoul;
 
-import kr._42.seoul.client.BrokerClient;
+import kr._42.seoul.client.BrokerChannelClient;
+import kr._42.seoul.enums.Command;
 import kr._42.seoul.parser.ParameterParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 public class Broker {
+    private static final Logger logger = LoggerFactory.getLogger(Broker.class);
+    private static int FAIL_STATUS = 2;
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5000;
-    private static int FAIL_STATUS = 2;
 
     public static void main(String[] args) {
-        ParameterParser paramParser = new ParameterParser();
-        paramParser.parse(args);
+        logger.debug("Start broker");
 
-        if (!paramParser.isValid()) {
-           usage();
-           exit();
-        }
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-        try (BrokerClient brokerClient = BrokerClient.open(HOSTNAME, PORT)) {
-            brokerClient.setup();
-            String response = brokerClient.request();
+        try (BrokerChannelClient brokerClient = SocketChannelClient.open(HOSTNAME, PORT, BrokerChannelClient.class)) {
+            executorService.submit(brokerClient);
 
-            System.out.println("RESPONSE: " + response);
+            inputLoop(brokerClient);
+
         } catch (RuntimeException e) {
-            error(e.getMessage());
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public static void inputLoop(BrokerChannelClient brokerClient) {
+        logger.debug("Running input loop");
+
+        Scanner scanner = new Scanner(System.in);
+        ParameterParser paramParser = new ParameterParser();
+
+        while (true) {
+            usage();
+            inputSymbol();
+
+            String line = scanner.nextLine();
+            String[] stringArray = line.split("\\s+");
+
+            paramParser.parse(stringArray);
+
+            if (!paramParser.isValid()) {
+                System.out.println("Invalid input");
+                continue;
+            }
+
+            Command command = paramParser.getCommand();
+            if (command == Command.EXIT) {
+                System.out.println("Bye");
+                brokerClient.close();
+                break;
+            }
+
+            brokerClient.request("message");
         }
     }
 
     private static void usage() {
-        System.err.println("Usage");
-        System.err.println("\tjava -jar market.jar [sell|buy] [instrument] [quantity] [market] [price]");
-        System.err.println("\tjava -jar market.jar markets");
-        System.err.println("\tjava -jar market.jar market [market]");
+        System.out.println();
+
+        System.out.println("Usage");
+        System.out.println("\t[sell|buy] [instrument] [quantity] [market] [price]");
+        System.out.println("\tmarkets");
+        System.out.println("\tmarket [market]");
+        System.out.println("\texit");
+
+        System.out.println();
     }
 
-    private static void error(String message) {
-        System.err.println(message);
-        exit();
-    }
-
-    private static void exit() {
-        System.exit(FAIL_STATUS);
+    private static void inputSymbol() {
+        System.out.print("> ");
     }
 }

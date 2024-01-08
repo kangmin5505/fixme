@@ -43,6 +43,7 @@
     <module>router</module>
     <module>market</module>
     <module>broker</module>
+    <module>common</module>
   </modules>
 
   <build>

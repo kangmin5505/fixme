@@ -7,8 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="market" />
-        <module name="broker" />
         <module name="router" />
+        <module name="broker" />
+        <module name="common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="11" />

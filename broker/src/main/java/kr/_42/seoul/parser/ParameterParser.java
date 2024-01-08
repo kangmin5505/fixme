@@ -37,6 +37,7 @@ public class ParameterParser {
                         this.valid = true;
                     }
                     break;
+                case EXIT:
                 case MARKETS:
                     this.valid = true;
                     break;
@@ -45,6 +46,7 @@ public class ParameterParser {
                         this.market = args[1];
                         this.valid = true;
                     }
+                    break;
             }
         } catch (IllegalArgumentException e) {
         }
