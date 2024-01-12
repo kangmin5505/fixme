@@ -1,6 +1,6 @@
 package kr._42.seoul;
 
-import kr._42.seoul.client.BrokerClient;
+import kr._42.seoul.client.AsynchronousBrokerClient;
 import kr._42.seoul.enums.Command;
 import kr._42.seoul.parser.ParameterParser;
 import org.slf4j.Logger;
@@ -20,17 +20,26 @@ public class Broker {
     private static final int PORT = 5000;
 
     public static void main(String[] args) {
-        try (ClientMultiplexer brokerClient = new BrokerClient(HOSTNAME, PORT)) {
-            executorService.submit(brokerClient::run);
 
-            inputLoop(brokerClient);
-
+        try (AsynchronousClient broker = new AsynchronousBrokerClient(HOSTNAME, PORT)) {
+            broker.run();
         } catch (IOException e) {
             System.err.println(e.getMessage());
             System.exit(FAIL_STATUS);
         }
 
-        executorService.shutdown();
+
+//        try (ClientMultiplexer brokerClient = new BrokerClient(HOSTNAME, PORT)) {
+//            executorService.submit(brokerClient::run);
+//
+//            inputLoop(brokerClient);
+//
+//        } catch (IOException e) {
+//            System.err.println(e.getMessage());
+//            System.exit(FAIL_STATUS);
+//        }
+//
+//        executorService.shutdown();
     }
 
 

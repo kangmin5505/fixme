@@ -57,16 +57,22 @@ public class BrokerServer extends ServerMultiplexer {
             client.configureBlocking(false);
             client.register(this.selector, SelectionKey.OP_READ);
 
-            logger.debug("Try to send id to client");
-            // id 생성 후 전송
             String id = BrokerIDGenerator.generate();
             buffer = ByteBuffer.wrap(id.getBytes(UTF_8));
-            client.write(buffer);
+            buffer.flip();
+            int write = 0;
+            while (write == 0) {
+                logger.debug("Try to write ({}).", new String(buffer.array()));
+                Thread.sleep(500);
+                write = client.write(buffer);
+            }
 
-            logger.debug("Success to send id to client. (id = {})", id);
+            logger.debug("Success to write ({}). result : {}", new String(buffer.array()), write);
             logger.debug("Success to accept client ({})", client);
         } catch (IOException e) {
             throw new RuntimeException("Fail to accept client");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
