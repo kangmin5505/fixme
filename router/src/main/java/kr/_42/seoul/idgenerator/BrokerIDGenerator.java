@@ -6,7 +6,7 @@ public class BrokerIDGenerator {
 
     private BrokerIDGenerator() {}
 
-    public static String generate() {
+    public synchronized static String generate() {
         String formattedID = String.format("%06d", id++);
 
         if (id > MAX_ID) {

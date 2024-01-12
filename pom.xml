@@ -44,6 +44,7 @@
     <module>market</module>
     <module>broker</module>
     <module>common</module>
+      <module>client-common</module>
   </modules>
 
   <build>

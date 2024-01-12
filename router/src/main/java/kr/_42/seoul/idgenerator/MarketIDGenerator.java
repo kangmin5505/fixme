@@ -4,7 +4,7 @@ public class MarketIDGenerator {
     private static int id = 0;
     private static final int MAX_ID = 999999;
 
-    public static String generate() {
+    public synchronized static String generate() {
         String formattedID = String.format("%06d", id++);
 
         if (id > MAX_ID) {

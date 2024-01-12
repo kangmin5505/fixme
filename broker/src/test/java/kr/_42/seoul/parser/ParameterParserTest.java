@@ -52,51 +52,6 @@ class ParameterParserTest {
     }
 
     @Test
-    @DisplayName("market 명령어 파싱 성공")
-    void parseMarketSuccessTest() {
-        String command = "market";
-        String market = "A market";
-
-        String[] args = new String[] {command, market};
-        parameterParser.parse(args);
-
-        assertThat(parameterParser.isValid()).isEqualTo(true);
-        assertThat(parameterParser.getCommand()).isEqualTo(Command.MARKET);
-    }
-
-    @Test
-    @DisplayName("market 명령어 파싱 실패")
-    void parseMarketFailTest() {
-        String command = "market";
-
-        String[] invalidLengthArgs = new String[] {command};
-        parameterParser.parse(invalidLengthArgs);
-
-        assertThat(parameterParser.isValid()).isEqualTo(false);
-    }
-
-    @Test
-    @DisplayName("markets 명령어 파싱 성공")
-    void parseMarketsSuccessTest() {
-        String command = "markets";
-
-        String[] args = new String[] {command};
-        parameterParser.parse(args);
-
-        assertThat(parameterParser.getCommand()).isEqualTo(Command.MARKETS);
-        assertThat(parameterParser.isValid()).isEqualTo(true);
-    }
-
-    @Test
-    @DisplayName("markets 명령어 파싱 실패")
-    void parseMarketsFailTest() {
-        String[] invalidLengthArgs = new String[] {};
-        parameterParser.parse(invalidLengthArgs);
-
-        assertThat(parameterParser.isValid()).isEqualTo(false);
-    }
-
-    @Test
     @DisplayName("정의되지 않은 command")
     void invalidCommandTest() {
         String command = "invalid";

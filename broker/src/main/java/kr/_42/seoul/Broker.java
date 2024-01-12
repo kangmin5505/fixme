@@ -1,11 +1,12 @@
 package kr._42.seoul;
 
-import kr._42.seoul.client.BrokerChannelClient;
+import kr._42.seoul.client.BrokerClient;
 import kr._42.seoul.enums.Command;
 import kr._42.seoul.parser.ParameterParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,26 +14,27 @@ import java.util.concurrent.Executors;
 
 public class Broker {
     private static final Logger logger = LoggerFactory.getLogger(Broker.class);
+    private static ExecutorService executorService = Executors.newFixedThreadPool(1);
     private static int FAIL_STATUS = 2;
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5000;
 
     public static void main(String[] args) {
-        logger.debug("Start broker");
-
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
-
-        try (BrokerChannelClient brokerClient = SocketChannelClient.open(HOSTNAME, PORT, BrokerChannelClient.class)) {
-            executorService.submit(brokerClient);
+        try (ClientMultiplexer brokerClient = new BrokerClient(HOSTNAME, PORT)) {
+            executorService.submit(brokerClient::run);
 
             inputLoop(brokerClient);
 
-        } catch (RuntimeException e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
+            System.exit(FAIL_STATUS);
         }
+
+        executorService.shutdown();
     }
 
-    public static void inputLoop(BrokerChannelClient brokerClient) {
+
+    public static void inputLoop(ClientMultiplexer brokerClient) {
         logger.debug("Running input loop");
 
         Scanner scanner = new Scanner(System.in);
@@ -58,8 +60,6 @@ public class Broker {
                 brokerClient.close();
                 break;
             }
-
-            brokerClient.request("message");
         }
     }
 
@@ -68,8 +68,6 @@ public class Broker {
 
         System.out.println("Usage");
         System.out.println("\t[sell|buy] [instrument] [quantity] [market] [price]");
-        System.out.println("\tmarkets");
-        System.out.println("\tmarket [market]");
         System.out.println("\texit");
 
         System.out.println();

@@ -10,6 +10,7 @@
         <module name="router" />
         <module name="broker" />
         <module name="common" />
+        <module name="client-common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="11" />

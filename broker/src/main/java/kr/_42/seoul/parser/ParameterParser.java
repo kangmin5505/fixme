@@ -21,8 +21,6 @@ public class ParameterParser {
 
         // arg list
         // [sell|buy] [instrument] [quantity] [market] [price]
-        // markets
-        // market [market]
         try {
             this.command = Command.valueOf(args[0].toUpperCase());
             switch (this.command) {
@@ -38,14 +36,7 @@ public class ParameterParser {
                     }
                     break;
                 case EXIT:
-                case MARKETS:
                     this.valid = true;
-                    break;
-                case MARKET:
-                    if (args.length == 2) {
-                        this.market = args[1];
-                        this.valid = true;
-                    }
                     break;
             }
         } catch (IllegalArgumentException e) {

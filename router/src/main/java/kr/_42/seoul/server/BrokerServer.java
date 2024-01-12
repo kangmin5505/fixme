@@ -2,118 +2,95 @@ package kr._42.seoul.server;
 
 import kr._42.seoul.IOUtils;
 import kr._42.seoul.idgenerator.BrokerIDGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Set;
 
-public class BrokerServer extends Server {
-    private static final Logger logger = LoggerFactory.getLogger(BrokerServer.class);
-    private static final int PORT = 5000;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-    private BrokerServer() {
-        super(PORT);
-    }
-
-    public static <T extends Server> T open(Class<T> clazz) {
-        logger.debug("Try to open broker server");
-
-        T server = Server.open(clazz);
-
-        logger.debug("Success to open broker server");
-        return server;
-    }
-
-    protected void setup() {
+public class BrokerServer extends ServerMultiplexer {
+    public BrokerServer(int port) throws IOException {
+        super(port);
         Thread.currentThread().setName("BrokerServer");
 
-        logger.debug("Try to setup broker server");
-
-        super.setup();
-
-        logger.debug("Success to setup broker server");
+        logger.debug("Success to create broker server");
     }
 
     @Override
-    public void close() {
-        logger.debug("Try to close broker server");
+    public void implRun() {
+        while (true) {
+            try {
+                this.selector.select();
 
-        super.close();
+                Set<SelectionKey> selectionKeys = this.selector.selectedKeys();
 
-        logger.debug("Success to close broker server");
-    }
+                selectionKeys.stream()
+                             .filter(SelectionKey::isValid)
+                             .forEach(key -> {
+                                 if (key.isAcceptable()) {
+                                     this.accept(key);
+                                 } else if (key.isReadable()) {
+                                     this.read(key);
+                                 }
+                             });
 
-    @Override
-    public void run() {
-        logger.debug("Running broker server");
-
-        super.run();
-    }
-
-    @Override
-    protected void read(SelectionKey key) {
-        logger.debug("Try to read data from client");
-
-        SocketChannel client = (SocketChannel) key.channel();
-        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
-
-        try {
-            int readBytes = client.read(buffer);
-
-            if (readBytes == IOUtils.EOF) {
-                client.close();
-            } else if (readBytes > 0) {
-                logger.debug("Read {} bytes from {} - {}", readBytes, client, new String(buffer.array()).trim());
-
-                buffer.flip();
-                client.write(buffer);
-                buffer.clear();
+                selectionKeys.clear();
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                break;
             }
-
-            logger.debug("Success to read data from client");
-        } catch (IOException e) {
-            System.err.println("Fail to read data from client");
         }
     }
 
     @Override
-    protected void accept(SelectionKey key) {
-        logger.debug("Try to accept connection");
+    public void accept(SelectionKey key) {
+        ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
 
         try {
-            ServerSocketChannel server = (ServerSocketChannel) key.channel();
-            SocketChannel client = server.accept();
+            SocketChannel client = serverSocket.accept();
+            logger.debug("Try to accept client ({})", client);
 
-            logger.debug("Success to accept connection from {}", client);
-
-            this.setupClient(client);
-
-            // Generate Broker ID
-            String id = BrokerIDGenerator.generate();
-            ByteBuffer buffer = ByteBuffer.wrap(id.getBytes());
-            client.write(buffer);
-        } catch (IOException e) {
-            logger.error("Fail to accept connection");
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    private void setupClient(SocketChannel client) {
-        logger.debug("Try to setup client");
-
-        try {
             client.configureBlocking(false);
             client.register(this.selector, SelectionKey.OP_READ);
-        } catch (IOException e) {
-            logger.error("Fail to setup client");
-            throw new RuntimeException(e);
-        }
 
-        logger.debug("Success to setup client");
+            logger.debug("Try to send id to client");
+            // id 생성 후 전송
+            String id = BrokerIDGenerator.generate();
+            buffer = ByteBuffer.wrap(id.getBytes(UTF_8));
+            client.write(buffer);
+
+            logger.debug("Success to send id to client. (id = {})", id);
+            logger.debug("Success to accept client ({})", client);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to accept client");
+        }
+    }
+
+    @Override
+    public void read(SelectionKey key) {
+        SocketChannel client = (SocketChannel) key.channel();
+
+        logger.debug("Try to read from client ({})", client);
+
+        try {
+            buffer.clear();
+            int readByte = client.read(buffer);
+
+            if (readByte == IOUtils.EOF) {
+                this.disconnect(key);
+            } else {
+                buffer.flip();
+                String message = new String(buffer.array()).trim();
+                logger.debug("Read message from client ({}), ({})", client, message);
+            }
+        } catch (IOException e) {
+            logger.error("Fail to read from client ({}).", client);
+            logger.error(e.getMessage());
+            this.disconnect(key);
+        }
     }
 }
