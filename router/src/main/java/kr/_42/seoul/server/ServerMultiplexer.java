@@ -1,7 +1,7 @@
 package kr._42.seoul.server;
 
 import kr._42.seoul.IOUtils;
-import kr._42.seoul.idgenerator.IDGenerator;
+import kr._42.seoul.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,20 +13,24 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class ServerMultiplexer implements AutoCloseable {
     protected static final Logger logger = LoggerFactory.getLogger(ServerMultiplexer.class);
+    protected final ExecutorService executorService;
     protected static final int BUFFER_CAPACITY = 1024;
-    private final IDGenerator idGenerator;
     protected Selector selector;
     protected ServerSocketChannel serverSocket;
     protected final int port;
 
-    protected ServerMultiplexer(int port, IDGenerator idGenerator) throws IOException {
+    protected ServerMultiplexer(int port) throws IOException {
+        int nThreads = (Runtime.getRuntime().availableProcessors() - Router.ROUTER_THREAD_POOL_SIZE) / 2;
+
+        this.executorService = Executors.newFixedThreadPool(nThreads);
         this.port = port;
         this.selector = Selector.open();
         this.serverSocket = ServerSocketChannel.open();
-        this.idGenerator = idGenerator;
     }
 
     protected void setup() {
@@ -112,22 +116,7 @@ public abstract class ServerMultiplexer implements AutoCloseable {
         }
     }
 
-    protected void accept(SelectionKey key) {
-        logger.debug("Try to accept client");
-
-        ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
-        try {
-            SocketChannel client = serverSocket.accept();
-
-            Attachment attachment = new Attachment(BUFFER_CAPACITY, idGenerator.generate());
-            client.configureBlocking(false);
-            client.register(this.selector, SelectionKey.OP_WRITE, attachment);
-
-            logger.debug("Success to accept client ({})", client);
-        } catch (IOException e) {
-            throw new RuntimeException("Fail to accept client");
-        }
-    }
+    protected abstract void accept(SelectionKey key);
     protected abstract void read(SelectionKey key);
 
     protected class Attachment {
@@ -142,6 +131,10 @@ public abstract class ServerMultiplexer implements AutoCloseable {
         }
         public ByteBuffer getBuffer() {
             return this.buffer;
+        }
+
+        public String getId() {
+            return this.id;
         }
     }
 }

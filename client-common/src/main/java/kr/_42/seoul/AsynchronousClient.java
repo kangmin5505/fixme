@@ -41,15 +41,15 @@ public abstract class AsynchronousClient implements AutoCloseable {
         logger.debug("Running client");
 
         this.init();
-        this.getID();
+        this.receiveID();
 
         runImpl();
     }
 
-    protected void getID() {
+    protected void receiveID() {
         logger.debug("Try to get ID");
 
-        ByteBuffer buffer = ByteBuffer.allocate(bufferCapacity);
+        ByteBuffer buffer = ByteBuffer.allocate(this.bufferCapacity);
         try {
             this.client.read(buffer).get();
             this.id = new String(buffer.array()).trim();
@@ -64,7 +64,11 @@ public abstract class AsynchronousClient implements AutoCloseable {
 
     @Override
     public void close() {
-        IOUtils.close(client);
+        IOUtils.close(this.client);
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     public static class Attachment {

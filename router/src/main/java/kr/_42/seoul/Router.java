@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Router {
-    public static final int THREAD_POOL_SIZE = 2;
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    public static final int ROUTER_THREAD_POOL_SIZE = 2;
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(ROUTER_THREAD_POOL_SIZE);
     private static final int BROKER_PORT = 5000;
     private static final int MARKET_PORT = 5001;
 

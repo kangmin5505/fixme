@@ -18,14 +18,17 @@ public class AsynchronousMarketClient extends AsynchronousClient {
 
         while (true) {
             logger.debug("Try to read from server");
-            try {
 
+            try {
                 Integer result = this.client.read(buffer).get();
                 if (result == IOUtils.EOF) {
                     logger.debug("Server is closed");
                     break;
                 }
-                System.out.println("Do something");
+                logger.debug("result : {}", result);
+                buffer.flip();
+                logger.debug("Success to read from server : ({})", new String(buffer.array()).trim());
+                buffer.clear();
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }

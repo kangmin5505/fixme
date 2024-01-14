@@ -21,9 +21,10 @@ public class AsynchronousBrokerClient extends AsynchronousClient {
         while (true) {
             Console.usage();
             String line = Console.readLine();
-            String[] strings = line.split("\\s+");
+            String[] parameters = line.split("\\s+");
 
-            paramParser.parse(strings);
+            paramParser.parse(parameters);
+            // TODO: buffer overflow
             if (!paramParser.isValid()) {
                 Console.invalidInput();
                 continue;
@@ -36,8 +37,7 @@ public class AsynchronousBrokerClient extends AsynchronousClient {
 
             Attachment attachment = new Attachment(this.client, this.bufferCapacity);
             ByteBuffer buffer = attachment.getBuffer();
-
-            // test
+//            buffer.put(ParameterToFIX.convert(this.getId(), paramParser));
             buffer.put(line.getBytes());
             buffer.flip();
 
