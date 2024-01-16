@@ -15,12 +15,12 @@ public class ParameterParser {
     public void parse(String[] args) {
         this.valid = false;
 
-        if (args == null || args.length < 1) {
+        if (args == null || args.length < 1 || args.length > 5) {
             return;
         }
 
-        // arg list
         // [sell|buy] [instrument] [quantity] [market] [price]
+        // exit
         try {
             this.command = Command.valueOf(args[0].toUpperCase());
             switch (this.command) {
