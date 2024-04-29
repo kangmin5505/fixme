@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "mvn clean package",
+			"group": "build"
+		},
+		{
+			"label": "broker",
+			"type": "shell",
+			"command": "mvn clean package -pl broker",
+			"group": "build"
+		},
+		{
+			"label": "router",
+			"type": "shell",
+			"command": "mvn clean package -pl router",
+			"group": "build"
+		},
+		{
+			"label": "market",
+			"type": "shell",
+			"command": "mvn clean package -pl market",
+			"group": "build"
+		},
+		{
+			"label": "clean",
+			"type": "shell",
+			"command": "mvn clean",
+			"group": "build"
+		},
+	]
+}
