@@ -1,4 +1,7 @@
-package kr._42.seoul;
+package kr._42.seoul.client;
+
+import kr._42.seoul.enums.BrokerCommand;
+import kr._42.seoul.enums.BrokerMessageType;
 
 public class ConsoleParser {
     private BrokerCommand command;
@@ -8,11 +11,13 @@ public class ConsoleParser {
     private int price;
     private String market;
 
+    private ConsoleParser() {}
+
     public static ConsoleParser parse(String nextLine) {
         String[] split = nextLine.split("\\s+");
 
         if (split.length < 1) {
-            throw new IllegalArgumentException("Invalid command");
+            throw new IllegalArgumentException("Invalid arguments");
         }
 
         BrokerCommand command = BrokerCommand.valueOf(split[0].toUpperCase());
@@ -25,13 +30,13 @@ public class ConsoleParser {
             case EXIT:
                 return parseExit(split);
             default:
-                throw new IllegalArgumentException("Invalid command");
+                throw new IllegalArgumentException("Invalid arguments");
         }
     }
 
     private static ConsoleParser parseGet(String[] split) {
         if (split.length < 2) {
-            throw new IllegalArgumentException("Invalid command");
+            throw new IllegalArgumentException("Invalid arguments");
         }
 
         return ConsoleParser.builder()
@@ -48,7 +53,7 @@ public class ConsoleParser {
 
     private static ConsoleParser parsePost(String[] split) {
         if (split.length < 6) {
-            throw new IllegalArgumentException("Invalid command");
+            throw new IllegalArgumentException("Invalid arguments");
         }
 
         return ConsoleParser.builder()
@@ -143,7 +148,5 @@ public class ConsoleParser {
     public String toString() {
         return "ConsoleParser [command=" + command + ", msgType=" + msgType + ", instrument=" + instrument
                 + ", quantity=" + quantity + ", price=" + price + ", market=" + market + "]";
-    }
-
-    
+    }    
 }

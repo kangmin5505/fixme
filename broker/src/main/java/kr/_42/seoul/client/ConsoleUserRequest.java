@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.client;
 
 import java.util.Scanner;
 
@@ -7,7 +7,7 @@ public class ConsoleUserRequest implements UserRequest {
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
-    public Request getUserRequest() {
+    public Request getUserRequest() { 
         this.printMessage();
 
         ConsoleParser consoleParser = ConsoleParser.parse(scanner.nextLine());

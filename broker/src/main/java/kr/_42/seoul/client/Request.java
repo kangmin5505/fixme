@@ -1,4 +1,7 @@
-package kr._42.seoul;
+package kr._42.seoul.client;
+
+import kr._42.seoul.enums.BrokerCommand;
+import kr._42.seoul.enums.BrokerMessageType;
 
 public class Request {
     private BrokerCommand command;
@@ -7,6 +10,8 @@ public class Request {
     private int quantity;
     private int price;
     private String market;
+
+    private Request() {}
 
     public static RequestBuilder builder() {
         return new RequestBuilder();

@@ -2,6 +2,13 @@ package kr._42.seoul;
 
 import java.util.concurrent.ExecutorService;
 
+import kr._42.seoul.client.BrokerClient;
+import kr._42.seoul.client.ConsoleUserRequest;
+import kr._42.seoul.client.UserRequest;
+import kr._42.seoul.common.ThreadPool;
+import kr._42.seoul.server.BrokerServer;
+import kr._42.seoul.server.DefaultBrokerServer;
+
 public class Main {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5000;
@@ -21,7 +28,6 @@ public class Main {
                 e.printStackTrace();
             }
         });
-
 
         executorService.submit(() -> {
             while (true) {

@@ -1,7 +1,10 @@
-package kr._42.seoul;
+package kr._42.seoul.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import kr._42.seoul.enums.BrokerCommand;
+import kr._42.seoul.server.BrokerServer;
 
 public class BrokerClient {
     private static final Logger logger = LoggerFactory.getLogger(BrokerClient.class);
