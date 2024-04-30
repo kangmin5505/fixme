@@ -1,11 +1,11 @@
 package kr._42.seoul.client;
 
 import kr._42.seoul.enums.BrokerCommand;
-import kr._42.seoul.enums.BrokerMessageType;
+import kr._42.seoul.enums.BrokerCommandType;
 
 public class Request {
     private BrokerCommand command;
-    private BrokerMessageType msgType;
+    private BrokerCommandType commandType;
     private String instrument;
     private int quantity;
     private int price;
@@ -21,8 +21,8 @@ public class Request {
         return command;
     }
 
-    public BrokerMessageType getMsgType() {
-        return msgType;
+    public BrokerCommandType getCommandType() {
+        return commandType;
     }
 
     public String getInstrument() {
@@ -42,58 +42,47 @@ public class Request {
     }
 
     public static class RequestBuilder {
-        private BrokerCommand command;
-        private BrokerMessageType msgType;
-        private String instrument;
-        private int quantity;
-        private int price;
-        private String market;
+        private Request request = new Request();
 
         public RequestBuilder command(BrokerCommand command) {
-            this.command = command;
+            request.command = command;
             return this;
         }
 
-        public RequestBuilder msgType(BrokerMessageType msgType) {
-            this.msgType = msgType;
+        public RequestBuilder commandType(BrokerCommandType commandType) {
+            request.commandType = commandType;
             return this;
         }
 
         public RequestBuilder instrument(String instrument) {
-            this.instrument = instrument;
+            request.instrument = instrument;
             return this;
         }
 
         public RequestBuilder quantity(int quantity) {
-            this.quantity = quantity;
+            request.quantity = quantity;
             return this;
         }
 
         public RequestBuilder price(int price) {
-            this.price = price;
+            request.price = price;
             return this;
         }
 
         public RequestBuilder market(String market) {
-            this.market = market;
+            request.market = market;
             return this;
         }
 
         public Request build() {
-            Request request = new Request();
-            request.command = this.command;
-            request.msgType = this.msgType;
-            request.instrument = this.instrument;
-            request.quantity = this.quantity;
-            request.price = this.price;
-            request.market = this.market;
             return request;
         }
     }
 
     @Override
     public String toString() {
-        return "Request [command=" + command + ", msgType=" + msgType + ", instrument=" + instrument
-                + ", quantity=" + quantity + ", price=" + price + ", market=" + market + "]";
+        return "Request [command=" + command + ", commandType=" + commandType + ", instrument="
+                + instrument + ", quantity=" + quantity + ", price=" + price + ", market=" + market
+                + "]";
     }
 }

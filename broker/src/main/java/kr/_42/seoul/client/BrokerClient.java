@@ -2,17 +2,20 @@ package kr._42.seoul.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import kr._42.seoul.enums.BrokerCommand;
+import kr._42.seoul.ResponseHandler;
 import kr._42.seoul.server.BrokerServer;
 
 public class BrokerClient {
     private static final Logger logger = LoggerFactory.getLogger(BrokerClient.class);
     private final BrokerServer brokerServer;
-    private final UserRequest userRequest;
+    private final RequestHandler requestHandler;
+    private final ResponseHandler responseHandler;
 
-    public BrokerClient(BrokerServer brokerServer, UserRequest userRequest) {
+    public BrokerClient(BrokerServer brokerServer, RequestHandler requestHandler,
+            ResponseHandler responseHandler) {
         this.brokerServer = brokerServer;
-        this.userRequest = userRequest;
+        this.requestHandler = requestHandler;
+        this.responseHandler = responseHandler;
     }
 
     public void run() {
@@ -20,13 +23,21 @@ public class BrokerClient {
 
         while (true) {
             try {
-                Request request = userRequest.getUserRequest();
+                Request request = requestHandler.getRequest();
 
                 // 3. send request to broker server
-
                 logger.debug(request.toString());
-                if (request.getCommand() == BrokerCommand.EXIT) {
-                    System.exit(0);
+
+                switch (request.getCommand()) {
+                    case ORDER:
+                        brokerServer.order(request);
+                        break;
+                    case QUERY:
+                        Response response = brokerServer.query(request);
+                        responseHandler.handle(response);
+                        break;
+                    case EXIT:
+                        System.exit(0);
                 }
             } catch (Exception e) {
                 logger.error("Error occurred while getting user request", e);

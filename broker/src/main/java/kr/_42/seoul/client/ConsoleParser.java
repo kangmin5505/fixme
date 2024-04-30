@@ -1,11 +1,11 @@
 package kr._42.seoul.client;
 
 import kr._42.seoul.enums.BrokerCommand;
-import kr._42.seoul.enums.BrokerMessageType;
+import kr._42.seoul.enums.BrokerCommandType;
 
 public class ConsoleParser {
     private BrokerCommand command;
-    private BrokerMessageType msgType;
+    private BrokerCommandType commandType;
     private String instrument;
     private int quantity;
     private int price;
@@ -23,9 +23,9 @@ public class ConsoleParser {
         BrokerCommand command = BrokerCommand.valueOf(split[0].toUpperCase());
 
         switch (command) {
-            case POST:
+            case ORDER:
                 return parsePost(split);
-            case GET:
+            case QUERY:
                 return parseGet(split);
             case EXIT:
                 return parseExit(split);
@@ -39,8 +39,8 @@ public class ConsoleParser {
             throw new IllegalArgumentException("Invalid arguments");
         }
 
-        return ConsoleParser.builder().command(BrokerCommand.GET)
-                .msgType(BrokerMessageType.valueOf(split[1].toUpperCase())).build();
+        return ConsoleParser.builder().command(BrokerCommand.QUERY)
+                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).build();
     }
 
     private static ConsoleParser parseExit(String[] split) {
@@ -52,18 +52,18 @@ public class ConsoleParser {
             throw new IllegalArgumentException("Invalid arguments");
         }
 
-        return ConsoleParser.builder().command(BrokerCommand.POST)
-                .msgType(BrokerMessageType.valueOf(split[1].toUpperCase())).instrument(split[2])
-                .quantity(Integer.parseInt(split[3])).price(Integer.parseInt(split[4]))
-                .market(split[5]).build();
+        return ConsoleParser.builder().command(BrokerCommand.ORDER)
+                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).instrument(split[2])
+                .quantity(Integer.parseInt(split[3])).market(split[4])
+                .price(Integer.parseInt(split[5])).build();
     }
 
     public BrokerCommand getCommand() {
         return this.command;
     }
 
-    public BrokerMessageType getMsgType() {
-        return this.msgType;
+    public BrokerCommandType getCommandType() {
+        return this.commandType;
     }
 
     public String getInstrument() {
@@ -87,59 +87,47 @@ public class ConsoleParser {
     }
 
     private static class ConsoleParserBuilder {
-        private BrokerCommand command;
-        private BrokerMessageType msgType;
-        private String instrument;
-        private int quantity;
-        private int price;
-        private String market;
+        private ConsoleParser consoleParser = new ConsoleParser();
 
         private ConsoleParserBuilder command(BrokerCommand command) {
-            this.command = command;
+            consoleParser.command = command;
             return this;
         }
 
-        private ConsoleParserBuilder msgType(BrokerMessageType msgType) {
-            this.msgType = msgType;
+        private ConsoleParserBuilder commandType(BrokerCommandType commandType) {
+            consoleParser.commandType = commandType;
             return this;
         }
 
         private ConsoleParserBuilder instrument(String instrument) {
-            this.instrument = instrument;
+            consoleParser.instrument = instrument;
             return this;
         }
 
         private ConsoleParserBuilder quantity(int quantity) {
-            this.quantity = quantity;
+            consoleParser.quantity = quantity;
             return this;
         }
 
         private ConsoleParserBuilder price(int price) {
-            this.price = price;
+            consoleParser.price = price;
             return this;
         }
 
         private ConsoleParserBuilder market(String market) {
-            this.market = market;
+            consoleParser.market = market;
             return this;
         }
 
         private ConsoleParser build() {
-            ConsoleParser consoleParser = new ConsoleParser();
-            consoleParser.command = this.command;
-            consoleParser.msgType = this.msgType;
-            consoleParser.instrument = this.instrument;
-            consoleParser.quantity = this.quantity;
-            consoleParser.price = this.price;
-            consoleParser.market = this.market;
             return consoleParser;
         }
     }
 
     @Override
     public String toString() {
-        return "ConsoleParser [command=" + command + ", msgType=" + msgType + ", instrument="
-                + instrument + ", quantity=" + quantity + ", price=" + price + ", market=" + market
-                + "]";
+        return "ConsoleParser [command=" + command + ", commandType=" + commandType
+                + ", instrument=" + instrument + ", quantity=" + quantity + ", price=" + price
+                + ", market=" + market + "]";
     }
 }

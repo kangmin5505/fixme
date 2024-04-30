@@ -2,8 +2,8 @@ package kr._42.seoul;
 
 import java.util.concurrent.ExecutorService;
 import kr._42.seoul.client.BrokerClient;
-import kr._42.seoul.client.ConsoleUserRequest;
-import kr._42.seoul.client.UserRequest;
+import kr._42.seoul.client.ConsoleRequestHandler;
+import kr._42.seoul.client.RequestHandler;
 import kr._42.seoul.common.ThreadPool;
 import kr._42.seoul.server.BrokerServer;
 import kr._42.seoul.server.DefaultBrokerServer;
@@ -14,10 +14,13 @@ public class Main {
 
     public static void main(String[] args) {
 
-        BrokerServer brokerServer = new DefaultBrokerServer(HOSTNAME, PORT);
+        Repository repository = MemoryRepository.getInstance();
+        // Repository repository = new DBRepository();
+        BrokerServer brokerServer = new DefaultBrokerServer(HOSTNAME, PORT, repository);
 
-        UserRequest userRequest = new ConsoleUserRequest();
-        BrokerClient brokerClient = new BrokerClient(brokerServer, userRequest);
+        RequestHandler requestHandler = new ConsoleRequestHandler();
+        ResponseHandler responseHandler = new ConsoleResponseHandler();
+        BrokerClient brokerClient = new BrokerClient(brokerServer, requestHandler, responseHandler);
 
         ExecutorService executorService = ThreadPool.getExecutorService();
 
@@ -29,12 +32,12 @@ public class Main {
             }
         });
 
-        executorService.submit(() -> {
-            while (true) {
-                Thread.sleep(2000);
-                System.out.println("BrokerServer is running");
-            }
-        });
+        // executorService.submit(() -> {
+        // while (true) {
+        // Thread.sleep(2000);
+        // System.out.println("BrokerServer is running");
+        // }
+        // });
 
         executorService.shutdown();
     }
