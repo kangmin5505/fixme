@@ -3,10 +3,12 @@ package kr._42.seoul.server;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import kr._42.seoul.Repository;
-import kr._42.seoul.client.Request;
-import kr._42.seoul.client.Response;
+import kr._42.seoul.common.Request;
+import kr._42.seoul.common.Response;
 import kr._42.seoul.enums.BrokerCommandType;
+import kr._42.seoul.enums.OrderStatus;
+import kr._42.seoul.enums.ResponseStatusCode;
+import kr._42.seoul.server.repository.Repository;
 
 public class DefaultBrokerServer implements BrokerServer {
     private final Logger logger = LoggerFactory.getLogger(DefaultBrokerServer.class);
@@ -30,7 +32,7 @@ public class DefaultBrokerServer implements BrokerServer {
         // Send Message to Router
 
         repository.addOrderDetail(OrderDetail.builder().orderType(request.getCommandType())
-                .orderStatus(OrderStatus.Pending).instrument(request.getInstrument())
+                .orderStatus(OrderStatus.PENDING).instrument(request.getInstrument())
                 .quantity(request.getQuantity()).price(request.getPrice())
                 .market(request.getMarket()).build());
     }

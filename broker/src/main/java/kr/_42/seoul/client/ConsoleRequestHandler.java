@@ -1,6 +1,7 @@
 package kr._42.seoul.client;
 
 import java.util.Scanner;
+import kr._42.seoul.common.Request;
 
 public class ConsoleRequestHandler implements RequestHandler {
 

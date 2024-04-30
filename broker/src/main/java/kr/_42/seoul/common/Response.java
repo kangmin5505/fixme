@@ -1,6 +1,6 @@
-package kr._42.seoul.client;
+package kr._42.seoul.common;
 
-import kr._42.seoul.server.ResponseStatusCode;
+import kr._42.seoul.enums.ResponseStatusCode;
 
 public class Response {
     private final ResponseStatusCode responseStatusCode;

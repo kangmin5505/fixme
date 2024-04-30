@@ -1,7 +1,7 @@
-package kr._42.seoul;
+package kr._42.seoul.client;
 
 import java.util.List;
-import kr._42.seoul.client.Response;
+import kr._42.seoul.common.Response;
 import kr._42.seoul.server.OrderDetail;
 
 public class ConsoleResponseHandler implements ResponseHandler {

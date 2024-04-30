@@ -1,4 +1,4 @@
-package kr._42.seoul.client;
+package kr._42.seoul.common;
 
 import kr._42.seoul.enums.BrokerCommand;
 import kr._42.seoul.enums.BrokerCommandType;

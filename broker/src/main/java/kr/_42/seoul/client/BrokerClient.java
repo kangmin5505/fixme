@@ -2,7 +2,8 @@ package kr._42.seoul.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import kr._42.seoul.ResponseHandler;
+import kr._42.seoul.common.Request;
+import kr._42.seoul.common.Response;
 import kr._42.seoul.server.BrokerServer;
 
 public class BrokerClient {

@@ -2,6 +2,7 @@ package kr._42.seoul.server;
 
 import java.time.LocalDateTime;
 import kr._42.seoul.enums.BrokerCommandType;
+import kr._42.seoul.enums.OrderStatus;
 
 public class OrderDetail {
     private BrokerCommandType orderType;

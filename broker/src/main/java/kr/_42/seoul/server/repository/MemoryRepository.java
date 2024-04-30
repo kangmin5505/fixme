@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.server.repository;
 
 import java.util.List;
 import java.util.Queue;
