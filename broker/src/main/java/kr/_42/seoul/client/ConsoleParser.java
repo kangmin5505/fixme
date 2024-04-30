@@ -39,16 +39,12 @@ public class ConsoleParser {
             throw new IllegalArgumentException("Invalid arguments");
         }
 
-        return ConsoleParser.builder()
-            .command(BrokerCommand.GET)
-            .msgType(BrokerMessageType.valueOf(split[1].toUpperCase()))
-            .build();
+        return ConsoleParser.builder().command(BrokerCommand.GET)
+                .msgType(BrokerMessageType.valueOf(split[1].toUpperCase())).build();
     }
 
     private static ConsoleParser parseExit(String[] split) {
-        return ConsoleParser.builder()
-            .command(BrokerCommand.EXIT)
-            .build();
+        return ConsoleParser.builder().command(BrokerCommand.EXIT).build();
     }
 
     private static ConsoleParser parsePost(String[] split) {
@@ -56,14 +52,10 @@ public class ConsoleParser {
             throw new IllegalArgumentException("Invalid arguments");
         }
 
-        return ConsoleParser.builder()
-            .command(BrokerCommand.POST)
-            .msgType(BrokerMessageType.valueOf(split[1].toUpperCase()))
-            .instrument(split[2])
-            .quantity(Integer.parseInt(split[3]))
-            .price(Integer.parseInt(split[4]))
-            .market(split[5])
-            .build();
+        return ConsoleParser.builder().command(BrokerCommand.POST)
+                .msgType(BrokerMessageType.valueOf(split[1].toUpperCase())).instrument(split[2])
+                .quantity(Integer.parseInt(split[3])).price(Integer.parseInt(split[4]))
+                .market(split[5]).build();
     }
 
     public BrokerCommand getCommand() {
@@ -146,7 +138,8 @@ public class ConsoleParser {
 
     @Override
     public String toString() {
-        return "ConsoleParser [command=" + command + ", msgType=" + msgType + ", instrument=" + instrument
-                + ", quantity=" + quantity + ", price=" + price + ", market=" + market + "]";
-    }    
+        return "ConsoleParser [command=" + command + ", msgType=" + msgType + ", instrument="
+                + instrument + ", quantity=" + quantity + ", price=" + price + ", market=" + market
+                + "]";
+    }
 }

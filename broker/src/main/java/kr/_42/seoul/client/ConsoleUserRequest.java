@@ -7,19 +7,15 @@ public class ConsoleUserRequest implements UserRequest {
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
-    public Request getUserRequest() { 
+    public Request getUserRequest() {
         this.printMessage();
 
         ConsoleParser consoleParser = ConsoleParser.parse(scanner.nextLine());
 
-        return Request.builder()
-            .command(consoleParser.getCommand())
-            .msgType(consoleParser.getMsgType())
-            .instrument(consoleParser.getInstrument())
-            .quantity(consoleParser.getQuantity())
-            .price(consoleParser.getPrice())
-            .market(consoleParser.getMarket())
-            .build();
+        return Request.builder().command(consoleParser.getCommand())
+                .msgType(consoleParser.getMsgType()).instrument(consoleParser.getInstrument())
+                .quantity(consoleParser.getQuantity()).price(consoleParser.getPrice())
+                .market(consoleParser.getMarket()).build();
     }
 
     private void printMessage() {

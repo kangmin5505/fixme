@@ -1,7 +1,6 @@
 package kr._42.seoul;
 
 import java.util.concurrent.ExecutorService;
-
 import kr._42.seoul.client.BrokerClient;
 import kr._42.seoul.client.ConsoleUserRequest;
 import kr._42.seoul.client.UserRequest;
@@ -13,7 +12,8 @@ public class Main {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5000;
 
-    public static void main(String[] args) {        
+    public static void main(String[] args) {
+
         BrokerServer brokerServer = new DefaultBrokerServer(HOSTNAME, PORT);
 
         UserRequest userRequest = new ConsoleUserRequest();

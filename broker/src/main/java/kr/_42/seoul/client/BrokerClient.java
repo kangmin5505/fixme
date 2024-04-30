@@ -2,7 +2,6 @@ package kr._42.seoul.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import kr._42.seoul.enums.BrokerCommand;
 import kr._42.seoul.server.BrokerServer;
 
@@ -22,7 +21,7 @@ public class BrokerClient {
         while (true) {
             try {
                 Request request = userRequest.getUserRequest();
-        
+
                 // 3. send request to broker server
 
                 logger.debug(request.toString());

@@ -39,7 +39,7 @@ public class Request {
 
     public String getMarket() {
         return market;
-    }    
+    }
 
     public static class RequestBuilder {
         private BrokerCommand command;
@@ -48,7 +48,7 @@ public class Request {
         private int quantity;
         private int price;
         private String market;
-        
+
         public RequestBuilder command(BrokerCommand command) {
             this.command = command;
             return this;
@@ -93,7 +93,7 @@ public class Request {
 
     @Override
     public String toString() {
-        return "Request [command=" + command + ", msgType=" + msgType + ", instrument=" + instrument + ", quantity="
-                + quantity + ", price=" + price + ", market=" + market + "]";
+        return "Request [command=" + command + ", msgType=" + msgType + ", instrument=" + instrument
+                + ", quantity=" + quantity + ", price=" + price + ", market=" + market + "]";
     }
 }
