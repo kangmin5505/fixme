@@ -17,6 +17,7 @@ public class BrokerClient {
         this.brokerServer = brokerServer;
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
+        Thread.currentThread().setName("BrokerClientThread");
     }
 
     public void run() {
@@ -26,7 +27,6 @@ public class BrokerClient {
             try {
                 Request request = requestHandler.getRequest();
 
-                // 3. send request to broker server
                 logger.debug(request.toString());
 
                 switch (request.getCommand()) {

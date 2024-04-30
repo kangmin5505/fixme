@@ -12,4 +12,6 @@ public interface BrokerServer {
 
     Response query(Request request);
 
+    void run();
+
 }

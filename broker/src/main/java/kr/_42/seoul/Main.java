@@ -20,29 +20,25 @@ public class Main {
 
         Repository repository = MemoryRepository.getInstance();
         // Repository repository = new DBRepository();
-        BrokerServer brokerServer = new DefaultBrokerServer(HOSTNAME, PORT, repository);
+        try {
+            BrokerServer brokerServer = new DefaultBrokerServer(HOSTNAME, PORT, repository);
+            RequestHandler requestHandler = new ConsoleRequestHandler();
+            ResponseHandler responseHandler = new ConsoleResponseHandler();
+            BrokerClient brokerClient =
+                    new BrokerClient(brokerServer, requestHandler, responseHandler);
 
-        RequestHandler requestHandler = new ConsoleRequestHandler();
-        ResponseHandler responseHandler = new ConsoleResponseHandler();
-        BrokerClient brokerClient = new BrokerClient(brokerServer, requestHandler, responseHandler);
+            ExecutorService executorService = ThreadPool.getExecutorService();
 
-        ExecutorService executorService = ThreadPool.getExecutorService();
-
-        executorService.submit(() -> {
-            try {
+            executorService.submit(() -> {
+                brokerServer.run();
+            });
+            executorService.submit(() -> {
                 brokerClient.run();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        // executorService.submit(() -> {
-        // while (true) {
-        // Thread.sleep(2000);
-        // System.out.println("BrokerServer is running");
-        // }
-        // });
-
-        executorService.shutdown();
+            });
+            executorService.shutdown();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
