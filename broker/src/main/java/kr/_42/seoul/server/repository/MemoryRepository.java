@@ -11,13 +11,13 @@ public class MemoryRepository implements Repository {
 
     private MemoryRepository() {}
 
+    public static Repository getInstance() {
+        return instance;
+    }
+
     @Override
     public List<OrderDetail> getOrderDetails() {
         return List.copyOf(orderDetails);
-    }
-
-    public static Repository getInstance() {
-        return instance;
     }
 
     @Override

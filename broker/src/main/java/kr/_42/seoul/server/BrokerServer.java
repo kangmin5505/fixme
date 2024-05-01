@@ -1,5 +1,6 @@
 package kr._42.seoul.server;
 
+import java.io.IOException;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
 import kr._42.seoul.enums.ResponseStatusCode;
@@ -12,6 +13,6 @@ public interface BrokerServer {
 
     Response query(Request request);
 
-    void run();
+    void run() throws IOException;
 
 }

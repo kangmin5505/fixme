@@ -25,16 +25,21 @@ public class Main {
                     System.exit(1);
                 }
             });
+
+            executorService.submit(() -> {
+                try {
+                    marketRouter.run();
+                } catch (Exception e) {
+                    logger.error("Error occurred while running market router", e);
+                    System.exit(1);
+                }
+            });
             executorService.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // Mediator mediator = new Mediator(brokerRouter, marketRouter);
-
-        // executorService.submit(() -> {
-        // marketRouter.run();
-        // });
         // executorService.submit(() -> {
         // mediator.run();
         // });

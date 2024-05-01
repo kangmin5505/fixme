@@ -20,25 +20,18 @@ public class DefaultBrokerServer implements BrokerServer {
     private final Logger logger = LoggerFactory.getLogger(DefaultBrokerServer.class);
     private final String hostname;
     private final int port;
+    private final Repository repository;
     private final SocketChannel socketChannel;
     private final Selector selector;
-    private final Repository repository;
 
     // TODO: close socket
     public DefaultBrokerServer(String hostname, int port, Repository repository)
             throws IOException {
         this.hostname = hostname;
         this.port = port;
+        this.repository = repository;
         this.socketChannel = SocketChannel.open();
         this.selector = Selector.open();
-        this.repository = repository;
-        Thread.currentThread().setName("BrokerServerThread");
-    }
-
-    private void setup() throws IOException {
-        this.socketChannel.connect(new InetSocketAddress(this.hostname, this.port));
-        this.socketChannel.configureBlocking(false);
-        this.socketChannel.register(this.selector, SelectionKey.OP_READ);
     }
 
     @Override
@@ -74,15 +67,10 @@ public class DefaultBrokerServer implements BrokerServer {
     }
 
     @Override
-    public void run() {
+    public void run() throws IOException {
         this.logger.debug("BrokerServer is running");
 
-        try {
-            this.setup();
-        } catch (IOException e) {
-            this.logger.error("Error occurred while setting up server", e);
-            System.exit(1);
-        }
+        this.setup();
 
         while (true) {
             try {
@@ -107,6 +95,13 @@ public class DefaultBrokerServer implements BrokerServer {
             }            
         }
     }
+
+    private void setup() throws IOException {
+        this.socketChannel.connect(new InetSocketAddress(this.hostname, this.port));
+        this.socketChannel.configureBlocking(false);
+        this.socketChannel.register(this.selector, SelectionKey.OP_READ);
+    }
+
 
     private void read(SelectionKey key) {
         logger.debug("Reading from client");
