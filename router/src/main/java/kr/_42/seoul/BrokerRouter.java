@@ -16,23 +16,17 @@ public class BrokerRouter {
     private final ServerSocketChannel serverSocketChannel;
     private final Selector selector;
 
+    // TODO: close
     public BrokerRouter(int brokerPort) throws IOException {
-        this.logger.debug("BrokerRouter is created");
-
         this.port = brokerPort;
         this.serverSocketChannel = ServerSocketChannel.open();
         this.selector = Selector.open();
     }
 
-    public void run() {
+    public void run() throws IOException {
         this.logger.debug("BrokerRouter is running");
 
-        try {
-            setup();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        setup();
 
         while (true) {
             try {

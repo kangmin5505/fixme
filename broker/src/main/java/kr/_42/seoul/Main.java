@@ -4,8 +4,6 @@ import java.util.concurrent.ExecutorService;
 import kr._42.seoul.client.BrokerClient;
 import kr._42.seoul.client.ConsoleRequestHandler;
 import kr._42.seoul.client.ConsoleResponseHandler;
-import kr._42.seoul.client.RequestHandler;
-import kr._42.seoul.client.ResponseHandler;
 import kr._42.seoul.common.ThreadPool;
 import kr._42.seoul.server.BrokerServer;
 import kr._42.seoul.server.DefaultBrokerServer;
@@ -22,11 +20,8 @@ public class Main {
         // Repository repository = new DBRepository();
         try {
             BrokerServer brokerServer = new DefaultBrokerServer(HOSTNAME, PORT, repository);
-            RequestHandler requestHandler = new ConsoleRequestHandler();
-            ResponseHandler responseHandler = new ConsoleResponseHandler();
             BrokerClient brokerClient =
-                    new BrokerClient(brokerServer, requestHandler, responseHandler);
-
+                    new BrokerClient(brokerServer, new ConsoleRequestHandler(), new ConsoleResponseHandler());
             ExecutorService executorService = ThreadPool.getExecutorService();
 
             executorService.submit(() -> {
@@ -35,9 +30,9 @@ public class Main {
             executorService.submit(() -> {
                 brokerClient.run();
             });
+            
             executorService.shutdown();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
