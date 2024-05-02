@@ -2,27 +2,38 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "build",
+			"label": "install",
+			"type": "shell",
+			"command": "mvn install",
+			"group": "build"
+		},		{
+			"label": "package all",
 			"type": "shell",
 			"command": "mvn clean package",
 			"group": "build"
 		},
 		{
-			"label": "broker",
+			"label": "package broker",
 			"type": "shell",
 			"command": "mvn clean package -pl broker",
 			"group": "build"
 		},
 		{
-			"label": "router",
+			"label": "package router",
 			"type": "shell",
 			"command": "mvn clean package -pl router",
 			"group": "build"
 		},
 		{
-			"label": "market",
+			"label": "package market",
 			"type": "shell",
 			"command": "mvn clean package -pl market",
+			"group": "build"
+		},
+		{
+			"label": "package client-socket",
+			"type": "shell",
+			"command": "mvn clean package -pl client-socket",
 			"group": "build"
 		},
 		{

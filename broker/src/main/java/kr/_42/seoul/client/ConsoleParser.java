@@ -17,6 +17,7 @@ public class ConsoleParser {
         String[] split = nextLine.split("\\s+");
 
         if (split.length < 1) {
+
             throw new IllegalArgumentException("Invalid arguments");
         }
 

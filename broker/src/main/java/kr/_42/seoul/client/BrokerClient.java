@@ -17,7 +17,6 @@ public class BrokerClient {
         this.brokerServer = brokerServer;
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
-        Thread.currentThread().setName("BrokerClientThread");
     }
 
     public void run() {
@@ -41,7 +40,7 @@ public class BrokerClient {
                         System.exit(0);
                 }
             } catch (Exception e) {
-                logger.error("Error occurred while getting user request", e);
+                logger.error("Error occurred while getting user request", e.getMessage());
                 continue;
             }
         }

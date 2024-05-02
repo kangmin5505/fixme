@@ -1,59 +1,22 @@
 package kr._42.seoul;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Market {
+public class Market extends ClientSocket {
     private final Logger logger = LoggerFactory.getLogger(Market.class);
-    private String hostname;
-    private int port;
-    private Repository repository;
-    private SocketChannel socketChannel;
-    private Selector selector;
+    private final Repository repository;
 
-    public Market(String hostname, int port, Repository repository) throws IOException {
-        this.hostname = hostname;
-        this.port = port;
+    public Market(Repository repository) {
         this.repository = repository;
-        this.socketChannel = SocketChannel.open();
-        this.selector = Selector.open();
     }
 
-    public void run() throws IOException {
-
-        this.setup();
-
-        while (true) {
-            try {
-                this.selector.select();
-
-                for (SelectionKey key : this.selector.selectedKeys()) {
-                    if (!key.isValid()) {
-                        continue;
-                    }
-
-                    if (key.isWritable()) {
-                        this.write(key);
-                    } else if (key.isReadable()) {
-                        this.read(key);
-                    }
-                }
-
-                this.selector.selectedKeys().clear();
-            } catch (IOException e) {
-                this.logger.error("Error occurred while selecting keys", e);
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void write(SelectionKey key) throws IOException {
+    @Override
+    protected void write(SelectionKey key) throws IOException {
         logger.debug("Writing Ping to client");
 
         SocketChannel client = (SocketChannel) key.channel();
@@ -62,7 +25,8 @@ public class Market {
         key.interestOps(SelectionKey.OP_READ);
     }
 
-    private void read(SelectionKey key) {
+    @Override
+    protected void read(SelectionKey key) throws IOException {
         logger.debug("Reading from client");
 
         ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -78,11 +42,4 @@ public class Market {
             e.printStackTrace();
         }
     }
-
-    private void setup() throws IOException {
-        this.socketChannel.connect(new InetSocketAddress(this.hostname, this.port));
-        this.socketChannel.configureBlocking(false);
-        this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
-    }
-
 }

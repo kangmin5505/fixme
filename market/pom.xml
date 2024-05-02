@@ -14,5 +14,12 @@
     <properties>
         <mainClass>${project.groupId}.Main</mainClass>
     </properties>
-
+    
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>client-socket</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
