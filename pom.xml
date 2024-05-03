@@ -10,6 +10,7 @@
     <module>router</module>
     <module>market</module>
     <module>client-socket</module>
+    <module>common</module>
   </modules>
   
   <version>1.0-SNAPSHOT</version>

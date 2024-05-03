@@ -37,6 +37,12 @@
 			"group": "build"
 		},
 		{
+			"label": "package common",
+			"type": "shell",
+			"command": "mvn clean package -pl common",
+			"group": "build"
+		},
+		{
 			"label": "clean",
 			"type": "shell",
 			"command": "mvn clean",

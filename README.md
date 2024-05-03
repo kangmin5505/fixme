@@ -14,7 +14,7 @@ Simulation tools for the financial markets
 - Quantity(4)
 - Price(5)
 - Market(6)
-- Broker(7)
+- BrokerID(7)
 - Checksum(8)
 
 ### Examples
