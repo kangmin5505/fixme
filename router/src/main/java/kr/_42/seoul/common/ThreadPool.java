@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.common;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -1,9 +1,9 @@
 package kr._42.seoul;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import kr._42.seoul.common.ThreadPool;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -11,33 +11,33 @@ public class Main {
     private static final int MARKET_PORT = 5001;
 
     public static void main(String[] args) {
-        try {
-            BrokerRouter brokerRouter = new BrokerRouter(BROKER_PORT);
-            MarketRouter marketRouter = new MarketRouter(MARKET_PORT);
+        BrokerRouter brokerRouter = new BrokerRouter();
+        MarketRouter marketRouter = new MarketRouter();
 
-            ExecutorService executorService = ThreadPool.getExecutorService();
+        ExecutorService executorService = ThreadPool.getExecutorService();
 
-            executorService.submit(() -> {
-                try {
-                    brokerRouter.run();
-                } catch (Exception e) {
-                    logger.error("Error occurred while running broker router", e);
-                    System.exit(1);
-                }
-            });
+        executorService.submit(() -> {
+            try {
+                brokerRouter.open();
+                brokerRouter.bind(BROKER_PORT);
+                brokerRouter.run();
+            } catch (Exception e) {
+                logger.error("Error occurred while running broker router", e);
+                System.exit(1);
+            }
+        });
 
-            executorService.submit(() -> {
-                try {
-                    marketRouter.run();
-                } catch (Exception e) {
-                    logger.error("Error occurred while running market router", e);
-                    System.exit(1);
-                }
-            });
-            executorService.shutdown();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        executorService.submit(() -> {
+            try {
+                marketRouter.open();
+                marketRouter.bind(MARKET_PORT);
+                marketRouter.run();
+            } catch (Exception e) {
+                logger.error("Error occurred while running market router", e);
+                System.exit(1);
+            }
+        });
+        executorService.shutdown();
 
         // Mediator mediator = new Mediator(brokerRouter, marketRouter);
         // executorService.submit(() -> {

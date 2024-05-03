@@ -15,7 +15,6 @@ public class Market extends ClientSocket {
         this.repository = repository;
     }
 
-    @Override
     protected void write(SelectionKey key) throws IOException {
         logger.debug("Writing Ping to client");
 
@@ -25,8 +24,7 @@ public class Market extends ClientSocket {
         key.interestOps(SelectionKey.OP_READ);
     }
 
-    @Override
-    protected void read(SelectionKey key) throws IOException {
+protected void read(SelectionKey key) throws IOException {
         logger.debug("Reading from client");
 
         ByteBuffer buffer = ByteBuffer.allocate(1024);
