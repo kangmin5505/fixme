@@ -1,11 +1,11 @@
 package kr._42.seoul;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import kr._42.seoul.field.Tag;
 
 public class Market extends ClientSocket {
     private final Logger logger = LoggerFactory.getLogger(Market.class);
@@ -16,28 +16,28 @@ public class Market extends ClientSocket {
     }
 
     protected void write(SelectionKey key) throws IOException {
-        logger.debug("Writing Ping to client");
-
         SocketChannel client = (SocketChannel) key.channel();
 
-        client.write(ByteBuffer.wrap("Ping".getBytes()));
         key.interestOps(SelectionKey.OP_READ);
     }
 
-protected void read(SelectionKey key) throws IOException {
-        logger.debug("Reading from client");
-
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-
+    protected void read(SelectionKey key) throws IOException {
         SocketChannel client = (SocketChannel) key.channel();
 
-        try {
-            client.read(buffer);
-            buffer.flip();
+        this.buffer.clear();
+        client.read(this.buffer);
+        this.buffer.flip();
 
-            logger.debug(new String(buffer.array()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        FIXMessage fixMessage = new FIXMessage(this.buffer);
+
+        String id = (String) fixMessage.get(Tag.ID).getValue();
+        String msgType = (String) fixMessage.get(Tag.MSG_TYPE).getValue();
+        String instrument = (String) fixMessage.get(Tag.INSTRUMENT).getValue();
+        int quantity = (int) fixMessage.get(Tag.QUANTITY).getValue();
+        int price = (int) fixMessage.get(Tag.PRICE).getValue();
+
+        // TODO: add repository
+        logger.info("Received FIX Message: ID: {}, MsgType: {}, Instrument: {}, Quantity: {}, Price: {}",
+                id, msgType, instrument, quantity, price);
     }
 }

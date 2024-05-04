@@ -28,8 +28,8 @@ public abstract class ClientSocket {
         this.socketChannel.connect(new InetSocketAddress(hostname, port));
 
         this.setID();
-
         this.socketChannel.configureBlocking(false);
+        this.socketChannel.register(this.selector, SelectionKey.OP_READ);
 
         this.logger.info("Connected to server with ID: {}", this.id);
     }

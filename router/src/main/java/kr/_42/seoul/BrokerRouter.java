@@ -11,33 +11,36 @@ import org.slf4j.LoggerFactory;
 public class BrokerRouter extends ServerSocket {
     private final static Logger logger = LoggerFactory.getLogger(BrokerRouter.class);
     private final static IDGenerator idGenerator = new IDGenerator();
+    private Mediator mediator;
 
     protected void write(SelectionKey key) throws IOException {
-        logger.debug("Writing to client");
-
         SocketChannel client = (SocketChannel) key.channel();
         Object attachment = key.attachment();
+        byte[] bytes = (byte[]) attachment;
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
-        client.write(ByteBuffer.wrap(attachment.toString().getBytes()));
+        client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
+
+        logger.debug("Success to write to client: {}", new String(bytes));
     }
 
     protected void read(SelectionKey key) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-
         SocketChannel client = (SocketChannel) key.channel();
 
-        int readByte = client.read(buffer);
+        int readByte = client.read(this.buffer);
         if (readByte == -1) {
             client.close();
             key.cancel();
             return;
         }
 
-        buffer.flip();
-        FIXMessage message = new FIXMessage(buffer);
+        this.buffer.flip();
+        FIXMessage message = new FIXMessage(this.buffer);
 
-        logger.info(new String(message.toByteBuffer().array()));
+        this.mediator.sendMarketRouter(message);
+
+        logger.info("Success to send to marketRouter: {}", new String(message.toByteBuffer().array()));
     }
 
     protected void accept(SelectionKey key) throws IOException {
@@ -48,6 +51,10 @@ public class BrokerRouter extends ServerSocket {
         SelectionKey clientKey = client.register(this.selector, SelectionKey.OP_WRITE);
 
         String clientID = idGenerator.generateID();
-        clientKey.attach(clientID);
+        clientKey.attach(clientID.getBytes());
+    }
+
+    public void registerMediator(Mediator mediator) {
+        this.mediator = mediator;
     }
 }

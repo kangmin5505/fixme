@@ -32,11 +32,10 @@ public class BrokerServer extends ClientSocket {
                 && request.getCommandType() != BrokerCommandType.SELL) {
             return;
         }
-
-        byte[] bytes = requestToFIXMessage(request).toByteBuffer().array();
         
         try {
             SelectionKey selectionKey = this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
+            byte[] bytes = requestToFIXMessage(request).toByteBuffer().array();
             selectionKey.attach(bytes);
         } catch (ClosedChannelException e) {
             logger.error("Failed to register channel with selector", e);
@@ -59,7 +58,6 @@ public class BrokerServer extends ClientSocket {
         .price(request.getPrice())
         .market(request.getMarket())
         .build();
-
     }
 
     public Response query(Request request) {
@@ -76,13 +74,12 @@ public class BrokerServer extends ClientSocket {
         this.buffer.clear();
 
         client.read(this.buffer);
-        String s = this.bufferToString(this.buffer);
-        logger.info("Received: {}", s);
+        String str = this.bufferToString(this.buffer);
+
+        logger.info("Success to read from router: {}", str);
     }
 
     protected void write(SelectionKey key) throws IOException {
-        logger.info("Writing to client");
-        
         SocketChannel client = (SocketChannel) key.channel();
         Object attachment = key.attachment();
         byte[] bytes = (byte[]) attachment;
@@ -91,6 +88,6 @@ public class BrokerServer extends ClientSocket {
         client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
 
-        logger.info("Sent: {}", new String(bytes));
+        logger.info("Success to send to router: {}", new String(bytes));
     }
 }

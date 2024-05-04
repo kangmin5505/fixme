@@ -8,5 +8,4 @@ public class MemoryRepository implements Repository {
     public static Repository getInstance() {
         return instance;
     }
-
 }

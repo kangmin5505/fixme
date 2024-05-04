@@ -1,10 +1,8 @@
 package kr._42.seoul.field;
 
 public class FIXMsgType extends Field<String> {
-    public static final int TAG = 2;
-
     public FIXMsgType(String value) {
-        super(TAG, value);
+        super(Tag.MSG_TYPE, value);
     }
     
     public enum MsgType {

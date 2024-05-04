@@ -2,6 +2,7 @@ package kr._42.seoul;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class ServerSocket {
     private final Logger logger = LoggerFactory.getLogger(ServerSocket.class);
+    private final static int BUFFER_SIZE = 1024;
+    protected final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
     protected ServerSocketChannel serverSocketChannel;
     protected Selector selector;
     
@@ -23,6 +26,7 @@ public abstract class ServerSocket {
         this.serverSocketChannel.configureBlocking(false);
         this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
     }
+    
     public void run() throws IOException {
         while (true) {
             try {

@@ -3,11 +3,11 @@ package kr._42.seoul.field;
 import kr._42.seoul.FIXMessage;
 
 public abstract class Field<T> {
-    private final int tag;
+    private final Tag tag;
     private final T value;
     private final String tagValue;
 
-    public Field(int tag, T value) {
+    public Field(Tag tag, T value) {
         this.tag = tag;
         this.value = value;
         this.tagValue = String.format("%s=%s%s", tag, value, FIXMessage.SOH);
@@ -19,5 +19,9 @@ public abstract class Field<T> {
 
     public T getValue() {
         return this.value;
+    }
+
+    public Tag getTag() {
+        return this.tag;
     }
 }

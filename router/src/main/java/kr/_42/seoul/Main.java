@@ -13,9 +13,11 @@ public class Main {
     public static void main(String[] args) {
         BrokerRouter brokerRouter = new BrokerRouter();
         MarketRouter marketRouter = new MarketRouter();
+        Mediator mediator = new Mediator();
+        mediator.registerBrokerRouter(brokerRouter);
+        mediator.registerMarketRouter(marketRouter);
 
         ExecutorService executorService = ThreadPool.getExecutorService();
-
         executorService.submit(() -> {
             try {
                 brokerRouter.open();
