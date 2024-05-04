@@ -2,16 +2,17 @@ package kr._42.seoul.server;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.ClientSocket;
+import kr._42.seoul.FIXMessage;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
 import kr._42.seoul.enums.BrokerCommandType;
-import kr._42.seoul.enums.OrderStatus;
 import kr._42.seoul.enums.ResponseStatusCode;
 import kr._42.seoul.server.repository.Repository;
 
@@ -21,7 +22,6 @@ public class BrokerServer extends ClientSocket {
 
     private final Logger logger = LoggerFactory.getLogger(BrokerServer.class);
     private final Repository repository;
-
 
     public BrokerServer(Repository repository) {
         this.repository = repository;
@@ -33,19 +33,33 @@ public class BrokerServer extends ClientSocket {
             return;
         }
 
-        logger.debug("register write event to selector");
+        byte[] bytes = requestToFIXMessage(request).toByteBuffer().array();
+        
         try {
-            this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
-            this.selector.wakeup();
-
-            this.repository.addOrderDetail(OrderDetail.builder().orderType(request.getCommandType())
-            .orderStatus(OrderStatus.PENDING).instrument(request.getInstrument())
-            .quantity(request.getQuantity()).price(request.getPrice())
-            .market(request.getMarket()).build());
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            SelectionKey selectionKey = this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
+            selectionKey.attach(bytes);
+        } catch (ClosedChannelException e) {
+            logger.error("Failed to register channel with selector", e);
         }
+
+        this.selector.wakeup();
+
+        // this.repository.addOrderDetail(OrderDetail.builder().orderType(request.getCommandType())
+        // .orderStatus(OrderStatus.PENDING).instrument(request.getInstrument())
+        // .quantity(request.getQuantity()).price(request.getPrice())
+        // .market(request.getMarket()).build());
+    }
+
+    private FIXMessage requestToFIXMessage(Request request) {
+        return FIXMessage.builder()
+        .id(id)
+        .msgType(request.getCommandType().toString())
+        .instrument(request.getInstrument())
+        .quantity(request.getQuantity())
+        .price(request.getPrice())
+        .market(request.getMarket())
+        .build();
+
     }
 
     public Response query(Request request) {
@@ -58,29 +72,25 @@ public class BrokerServer extends ClientSocket {
     }
 
     protected void read(SelectionKey key) throws IOException {
-        logger.debug("Reading from client");
-
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-
         SocketChannel client = (SocketChannel) key.channel();
+        this.buffer.clear();
 
-        try {
-            client.read(buffer);
-            buffer.flip();
-            
-            logger.debug(new String(buffer.array()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        client.read(this.buffer);
+        String s = this.bufferToString(this.buffer);
+        logger.info("Received: {}", s);
     }
 
     protected void write(SelectionKey key) throws IOException {
-        logger.debug("Writing Ping to client");
-
+        logger.info("Writing to client");
+        
         SocketChannel client = (SocketChannel) key.channel();
+        Object attachment = key.attachment();
+        byte[] bytes = (byte[]) attachment;
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
-        client.write(ByteBuffer.wrap("Ping".getBytes()));
+        client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
-    }
 
+        logger.info("Sent: {}", new String(bytes));
+    }
 }

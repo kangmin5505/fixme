@@ -22,7 +22,7 @@ public class FIXMessage {
     private Map<Integer, Field<?>> trailer = new HashMap<>(); // Checksum
 
     public FIXMessage(ByteBuffer buffer) throws IllegalArgumentException {
-        String s = new String(buffer.array());
+        String s = new String(buffer.array()).trim();
         String[] fields = s.split(SOH);
 
         for (String field : fields) {

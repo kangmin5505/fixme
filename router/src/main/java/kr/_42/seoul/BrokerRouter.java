@@ -9,19 +9,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BrokerRouter extends ServerSocket {
-    private final Logger logger = LoggerFactory.getLogger(BrokerRouter.class);
+    private final static Logger logger = LoggerFactory.getLogger(BrokerRouter.class);
+    private final static IDGenerator idGenerator = new IDGenerator();
 
     protected void write(SelectionKey key) throws IOException {
         logger.debug("Writing to client");
 
         SocketChannel client = (SocketChannel) key.channel();
+        Object attachment = key.attachment();
 
-        client.write(ByteBuffer.wrap("Pong".getBytes()));
+        client.write(ByteBuffer.wrap(attachment.toString().getBytes()));
+        key.interestOps(SelectionKey.OP_READ);
     }
 
     protected void read(SelectionKey key) throws IOException {
-        this.logger.debug("Reading from client");
-
         ByteBuffer buffer = ByteBuffer.allocate(1024);
 
         SocketChannel client = (SocketChannel) key.channel();
@@ -34,8 +35,9 @@ public class BrokerRouter extends ServerSocket {
         }
 
         buffer.flip();
-        logger.debug(new String(buffer.array()));
-        client.write(ByteBuffer.wrap("Pong".getBytes()));
+        FIXMessage message = new FIXMessage(buffer);
+
+        logger.info(new String(message.toByteBuffer().array()));
     }
 
     protected void accept(SelectionKey key) throws IOException {
@@ -43,6 +45,9 @@ public class BrokerRouter extends ServerSocket {
 
         SocketChannel client = serverSocketChannel.accept();
         client.configureBlocking(false);
-        client.register(this.selector, SelectionKey.OP_READ);
+        SelectionKey clientKey = client.register(this.selector, SelectionKey.OP_WRITE);
+
+        String clientID = idGenerator.generateID();
+        clientKey.attach(clientID);
     }
 }
