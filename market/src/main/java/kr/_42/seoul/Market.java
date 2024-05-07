@@ -1,6 +1,7 @@
 package kr._42.seoul;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import org.slf4j.Logger;
@@ -17,8 +18,14 @@ public class Market extends ClientSocket {
 
     protected void write(SelectionKey key) throws IOException {
         SocketChannel client = (SocketChannel) key.channel();
+        Object attachment = key.attachment();
+        byte[] bytes = (byte[]) attachment;
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
+        client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
+
+        logger.info("Sending to router: {}", new String(bytes));
     }
 
     protected void read(SelectionKey key) throws IOException {
@@ -28,16 +35,23 @@ public class Market extends ClientSocket {
         client.read(this.buffer);
         this.buffer.flip();
 
-        FIXMessage fixMessage = new FIXMessage(this.buffer);
+        FIXMessage receivedMessage = new FIXMessage(this.buffer);
 
-        String id = (String) fixMessage.get(Tag.ID).getValue();
-        String msgType = (String) fixMessage.get(Tag.MSG_TYPE).getValue();
-        String instrument = (String) fixMessage.get(Tag.INSTRUMENT).getValue();
-        int quantity = (int) fixMessage.get(Tag.QUANTITY).getValue();
-        int price = (int) fixMessage.get(Tag.PRICE).getValue();
+        String brokerID = (String) receivedMessage.get(Tag.ID).getValue();
+        String msgType = (String) receivedMessage.get(Tag.MSG_TYPE).getValue();
+        String instrument = (String) receivedMessage.get(Tag.INSTRUMENT).getValue();
+        int quantity = (int) receivedMessage.get(Tag.QUANTITY).getValue();
+        int price = (int) receivedMessage.get(Tag.PRICE).getValue();
 
         // TODO: add repository
-        logger.info("Received FIX Message: ID: {}, MsgType: {}, Instrument: {}, Quantity: {}, Price: {}",
-                id, msgType, instrument, quantity, price);
+        logger.info(
+                "Received FIX Message: ID: {}, MsgType: {}, Instrument: {}, Quantity: {}, Price: {}",
+                brokerID, msgType, instrument, quantity, price);
+
+        FIXMessage sendMessage = FIXMessage.builder().id(id).msgType(MarketMsgType.EXECUTED.toString())
+                .instrument(instrument).quantity(quantity).price(price).brokerID(brokerID).build();
+
+        key.attach(sendMessage.toByteBuffer().array());
+        key.interestOps(SelectionKey.OP_WRITE);
     }
 }

@@ -76,7 +76,7 @@ public class BrokerServer extends ClientSocket {
         client.read(this.buffer);
         String str = this.bufferToString(this.buffer);
 
-        logger.info("Success to read from router: {}", str);
+        logger.info("Reading from router: {}", str);
     }
 
     protected void write(SelectionKey key) throws IOException {
@@ -88,6 +88,6 @@ public class BrokerServer extends ClientSocket {
         client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
 
-        logger.info("Success to send to router: {}", new String(bytes));
+        logger.info("Sending to router: {}", new String(bytes));
     }
 }

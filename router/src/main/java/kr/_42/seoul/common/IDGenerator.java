@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.common;
 
 public class IDGenerator {
     private int id = 0;

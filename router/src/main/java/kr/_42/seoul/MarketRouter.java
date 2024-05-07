@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import kr._42.seoul.field.Tag;
+import kr._42.seoul.common.ByteBufferHelper;
+import kr._42.seoul.common.IDGenerator;
 
 public class MarketRouter extends ServerSocket {
-    private final static IDGenerator idGenerator = new IDGenerator();
-    private final Map<String, SocketChannel> clients = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(MarketRouter.class);
+    private final static IDGenerator idGenerator = new IDGenerator();
+    private final Map<String, SocketChannel> marketClients = new HashMap<>();
     private Mediator mediator;
 
     protected void write(SelectionKey key) throws IOException {
@@ -27,21 +28,26 @@ public class MarketRouter extends ServerSocket {
         client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
 
-        logger.debug("Success to write to client: {}", new String(bytes));
+        logger.info("Sending to market client: {}", new String(bytes));
     }
 
     protected void read(SelectionKey key) throws IOException {
         SocketChannel client = (SocketChannel) key.channel();
+        this.buffer.clear();
 
         int readByte = client.read(this.buffer);
+
         if (readByte == -1) {
             client.close();
             key.cancel();
             return;
         }
 
-        this.buffer.flip();
-        client.write(ByteBuffer.wrap("Pong".getBytes()));
+        ByteBuffer copyByteBuffer = ByteBufferHelper.deepCopy(this.buffer);
+        this.mediator.sendToBrokerRouter(copyByteBuffer);
+
+        logger.info("Forwarding to BrokerRouter: {}",
+                new String(copyByteBuffer.array()));
     }
 
     protected void accept(SelectionKey key) throws IOException {
@@ -52,7 +58,7 @@ public class MarketRouter extends ServerSocket {
         SelectionKey clientKey = client.register(this.selector, SelectionKey.OP_WRITE);
 
         String clientID = idGenerator.generateID();
-        this.clients.put(clientID, client);
+        this.marketClients.put(clientID, client);
         clientKey.attach(clientID.getBytes());
     }
 
@@ -60,21 +66,18 @@ public class MarketRouter extends ServerSocket {
         this.mediator = mediator;
     }
 
-    public void sendToMarket(FIXMessage message) {
-        String marketID = (String)message.get(Tag.ID).getValue();
+    public void sendToMarket(ByteBuffer byteBuffer, String marketID) {
         // TODO: handle null
-        SocketChannel marketClientSocket = this.clients.get(marketID);
+        SocketChannel marketClientSocket = this.marketClients.get(marketID);
+        byte[] bytes = byteBuffer.array();
 
         try {
             SelectionKey selectionKey = marketClientSocket.register(this.selector, SelectionKey.OP_WRITE);
-            byte[] bytes = message.toByteBuffer().array();
             selectionKey.attach(bytes);
         } catch (ClosedChannelException e) {
             logger.error("Failed to register channel with selector", e);
         }
 
         this.selector.wakeup();
-
-        logger.info("Success to send to market: {}", new String(message.toByteBuffer().array()));
     }
 }
