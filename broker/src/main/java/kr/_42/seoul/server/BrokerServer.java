@@ -70,13 +70,17 @@ public class BrokerServer extends ClientSocket {
     }
 
     protected void read(SelectionKey key) throws IOException {
-        SocketChannel client = (SocketChannel) key.channel();
+        SocketChannel channel = (SocketChannel) key.channel();
         this.buffer.clear();
 
-        client.read(this.buffer);
-        String str = this.bufferToString(this.buffer);
+        int readByte = channel.read(this.buffer);
+        if (readByte == -1) {
+            this.close();
+            logger.error("Connection closed by router");
+            System.exit(1);
+        }
 
-        logger.info("Reading from router: {}", str);
+        logger.info("Reading from router: {}", new String(this.buffer.array()).trim());
     }
 
     protected void write(SelectionKey key) throws IOException {

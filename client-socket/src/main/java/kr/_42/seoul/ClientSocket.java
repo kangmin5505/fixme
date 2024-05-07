@@ -6,8 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +32,13 @@ public abstract class ClientSocket {
         this.logger.info("Connected to server with ID: {}", this.id);
     }
 
-    protected String bufferToString(ByteBuffer buffer) {
-        this.buffer.flip();
-        byte[] bytes = Arrays.copyOfRange(this.buffer.array(), 0, this.buffer.limit());
-
-        return new String(bytes, StandardCharsets.UTF_8);
+    protected void close() {
+        try {
+            this.socketChannel.close();
+            this.selector.close();
+        } catch (IOException e) {
+            this.logger.error("Error occurred while closing socket channel", e);
+        }
     }
 
     private void setID() throws IOException {

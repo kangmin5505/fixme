@@ -63,7 +63,9 @@ public class FIXMessage {
     public ByteBuffer toByteBuffer() {
         ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 
-        buffer.put(this.header.get(Tag.ID).getTagValue().getBytes());
+        this.header.keySet().forEach(key -> {
+            buffer.put(this.header.get(key).getTagValue().getBytes());
+        });
         this.body.keySet().forEach(key -> {
             buffer.put(this.body.get(key).getTagValue().getBytes());
         });
@@ -79,7 +81,7 @@ public class FIXMessage {
         return new FIXMessageBuilder();
     }
 
-    public Field<?> get(Tag tag) throws IllegalArgumentException {
+    public Field<?> get(Tag tag) {
         if (this.header.containsKey(tag)) {
             return this.header.get(tag);
         } else if (this.body.containsKey(tag)) {
@@ -88,7 +90,7 @@ public class FIXMessage {
             return this.trailer.get(tag);
         }
 
-        throw new IllegalArgumentException("Invalid tag: " + tag);
+        return null;
     }
 
     public static class FIXMessageBuilder {

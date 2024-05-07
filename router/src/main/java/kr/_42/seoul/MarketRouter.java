@@ -16,30 +16,35 @@ import kr._42.seoul.common.IDGenerator;
 public class MarketRouter extends ServerSocket {
     private final Logger logger = LoggerFactory.getLogger(MarketRouter.class);
     private final static IDGenerator idGenerator = new IDGenerator();
-    private final Map<String, SocketChannel> marketClients = new HashMap<>();
+    private final static Map<String, SocketChannel> marketClients = new HashMap<>();
     private Mediator mediator;
 
+    public static boolean isExistMarketClient(String marketID) {
+        return marketClients.containsKey(marketID);
+    }
+
     protected void write(SelectionKey key) throws IOException {
-        SocketChannel client = (SocketChannel) key.channel();
+        SocketChannel channel = (SocketChannel) key.channel();
         Object attachment = key.attachment();
         byte[] bytes = (byte[]) attachment;
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
-        client.write(byteBuffer);
+        channel.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
 
         logger.info("Sending to market client: {}", new String(bytes));
     }
 
     protected void read(SelectionKey key) throws IOException {
-        SocketChannel client = (SocketChannel) key.channel();
+        SocketChannel channel = (SocketChannel) key.channel();
         this.buffer.clear();
 
-        int readByte = client.read(this.buffer);
+        int readByte = channel.read(this.buffer);
 
         if (readByte == -1) {
-            client.close();
+            channel.close();
             key.cancel();
+            marketClients.values().remove(channel);
             return;
         }
 
@@ -58,7 +63,7 @@ public class MarketRouter extends ServerSocket {
         SelectionKey clientKey = client.register(this.selector, SelectionKey.OP_WRITE);
 
         String clientID = idGenerator.generateID();
-        this.marketClients.put(clientID, client);
+        marketClients.put(clientID, client);
         clientKey.attach(clientID.getBytes());
     }
 
@@ -67,8 +72,7 @@ public class MarketRouter extends ServerSocket {
     }
 
     public void sendToMarket(ByteBuffer byteBuffer, String marketID) {
-        // TODO: handle null
-        SocketChannel marketClientSocket = this.marketClients.get(marketID);
+        SocketChannel marketClientSocket = marketClients.get(marketID);
         byte[] bytes = byteBuffer.array();
 
         try {

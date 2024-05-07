@@ -29,11 +29,15 @@ public class Market extends ClientSocket {
     }
 
     protected void read(SelectionKey key) throws IOException {
-        SocketChannel client = (SocketChannel) key.channel();
-
+        SocketChannel channel = (SocketChannel) key.channel();
         this.buffer.clear();
-        client.read(this.buffer);
-        this.buffer.flip();
+
+        int readByte = channel.read(this.buffer);
+        if (readByte == -1) {
+            this.close();
+            logger.error("Connection closed by router");
+            System.exit(1);
+        }
 
         FIXMessage receivedMessage = new FIXMessage(this.buffer);
 

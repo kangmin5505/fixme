@@ -16,28 +16,34 @@ import kr._42.seoul.common.IDGenerator;
 public class BrokerRouter extends ServerSocket {
     private final static Logger logger = LoggerFactory.getLogger(BrokerRouter.class);
     private final static IDGenerator idGenerator = new IDGenerator();
-    private final Map<String, SocketChannel> brokerClients = new HashMap<>();
+    private final static Map<String, SocketChannel> brokerClients = new HashMap<>();
     private Mediator mediator;
 
+    public static boolean isExistBrokerClient(String brokerID) {
+        return brokerClients.containsKey(brokerID);
+    }
+
     protected void write(SelectionKey key) throws IOException {
-        SocketChannel client = (SocketChannel) key.channel();
+        SocketChannel channel = (SocketChannel) key.channel();
         Object attachment = key.attachment();
         byte[] bytes = (byte[]) attachment;
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
-        client.write(byteBuffer);
+        channel.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
 
         logger.info("Sending to broker client: {}", new String(bytes));
     }
 
     protected void read(SelectionKey key) throws IOException {
-        SocketChannel client = (SocketChannel) key.channel();
+        SocketChannel channel = (SocketChannel) key.channel();
+        this.buffer.clear();
 
-        int readByte = client.read(this.buffer);
+        int readByte = channel.read(this.buffer);
         if (readByte == -1) {
-            client.close();
+            channel.close();
             key.cancel();
+            brokerClients.values().remove(channel);
             return;
         }
 
@@ -56,7 +62,7 @@ public class BrokerRouter extends ServerSocket {
         SelectionKey clientKey = client.register(this.selector, SelectionKey.OP_WRITE);
 
         String clientID = idGenerator.generateID();
-        this.brokerClients.put(clientID, client);
+        brokerClients.put(clientID, client);
         clientKey.attach(clientID.getBytes());
     }
 
@@ -65,8 +71,7 @@ public class BrokerRouter extends ServerSocket {
     }
 
     public void sendToBroker(ByteBuffer byteBuffer, String brokerID) {
-        // TODO: handle null
-        SocketChannel brokerClientSocket = this.brokerClients.get(brokerID);
+        SocketChannel brokerClientSocket = brokerClients.get(brokerID);
         byte[] bytes = byteBuffer.array();
 
         try {
