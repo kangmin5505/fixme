@@ -1,28 +1,34 @@
 package kr._42.seoul;
 
 import java.io.IOException;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static final int FAIL_CODE = 1;
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5001;
 
     public static void main(String[] args) {
+        boolean result = InstrumentRegister.register(args);
+        if (!result) {
+            logger.error("Usage: java -jar market.jar [instrument1] [instrument2] ...");
+            System.exit(1);
+        }
 
         Repository repository = MemoryRepository.getInstance();
         // Repository repository = new DBRepository();
 
-        Market market = new Market(repository);
+        Set<String> instruments = InstrumentRegister.getInstruments();
+        Market market = new Market(instruments, repository);
 
         try {
             market.open();
             market.connect(HOSTNAME, PORT);
         } catch (IOException e) {
             logger.error("Failed to start Market Server", e.getMessage());
-            System.exit(FAIL_CODE);
+            System.exit(1);
         }
 
         market.run();

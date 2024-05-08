@@ -14,7 +14,6 @@ import kr._42.seoul.server.repository.Repository;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static final int FAIL_CODE = 1;
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 5000;
 
@@ -33,7 +32,7 @@ public class Main {
             brokerServer.connect(HOSTNAME, PORT);
         } catch (IOException e) {
             logger.error("Failed to start Market Server", e.getMessage());
-            System.exit(FAIL_CODE);
+            System.exit(1);
         }
 
         executorService.submit(() -> {
