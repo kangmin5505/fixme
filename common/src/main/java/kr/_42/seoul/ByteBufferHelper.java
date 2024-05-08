@@ -1,4 +1,4 @@
-package kr._42.seoul.common;
+package kr._42.seoul;
 
 import java.nio.ByteBuffer;
 

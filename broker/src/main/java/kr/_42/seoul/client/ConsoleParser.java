@@ -65,7 +65,7 @@ public class ConsoleParser {
         }
 
         return ConsoleParser.builder().command(BrokerCommand.ORDER)
-                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).instrument(split[2])
+                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).instrument(split[2].toUpperCase())
                 .quantity(quantity).market(split[4]).price(price).build();
     }
 
