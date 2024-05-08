@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.market;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,7 +7,11 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import kr._42.seoul.ClientSocket;
+import kr._42.seoul.FIXMessage;
+import kr._42.seoul.enums.MarketMsgType;
 import kr._42.seoul.field.Tag;
+import kr._42.seoul.repository.Repository;
 
 public class Market extends ClientSocket {
     private final Logger logger = LoggerFactory.getLogger(Market.class);

@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.broker;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.common.ByteBufferHelper;
 import kr._42.seoul.common.IDGenerator;
+import kr._42.seoul.common.Mediator;
+import kr._42.seoul.common.ServerSocket;
 
 public class BrokerRouter extends ServerSocket {
     private final static Logger logger = LoggerFactory.getLogger(BrokerRouter.class);

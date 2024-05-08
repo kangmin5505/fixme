@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.market;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

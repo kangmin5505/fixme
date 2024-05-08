@@ -1,9 +1,9 @@
-package kr._42.seoul;
+package kr._42.seoul.validator;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import kr._42.seoul.broker.BrokerRouter;
 import kr._42.seoul.field.Tag;
-import kr._42.seoul.validator.BaseValidator;
 
 public class MarketRoutingValidator extends BaseValidator {
 

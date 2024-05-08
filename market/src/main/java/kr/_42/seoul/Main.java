@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import kr._42.seoul.market.InstrumentRegister;
+import kr._42.seoul.market.Market;
+import kr._42.seoul.repository.MemoryRepository;
+import kr._42.seoul.repository.Repository;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);

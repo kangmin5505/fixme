@@ -1,4 +1,4 @@
-package kr._42.seoul;
+package kr._42.seoul.repository;
 
 public interface Repository {
     static Repository getInstance() {
