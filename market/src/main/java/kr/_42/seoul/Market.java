@@ -60,6 +60,14 @@ public class Market extends ClientSocket {
                 return;
             }
 
+            if (msgType.equals(MarketMsgType.BUY.toString())) {
+                // this.repository.buy(instrument, quantity, price, brokerID);
+            } else if (msgType.equals(MarketMsgType.SELL.toString())) {
+                // this.repository.sell(instrument, quantity, price, brokerID);
+            } else {
+                this.sendInvalidMessage(key, brokerID);
+            }
+
         } catch (Exception e) {
             String brokerID = (String) receivedMessage.get(Tag.ID).getValue();
             this.sendInvalidMessage(key, brokerID);

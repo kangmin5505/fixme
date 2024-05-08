@@ -6,4 +6,5 @@ public interface ResponseHandler {
 
     void handle(Response response);
 
+    void error(String message);
 }

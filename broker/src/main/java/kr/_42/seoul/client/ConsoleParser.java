@@ -14,30 +14,35 @@ public class ConsoleParser {
     private ConsoleParser() {}
 
     public static ConsoleParser parse(String nextLine) {
-        String[] split = nextLine.split("\\s+");
+        String[] split = nextLine.trim().split("\\s+");
 
         if (split.length < 1) {
-
-            throw new IllegalArgumentException("Invalid arguments");
+            throw new IllegalArgumentException("Arguments are empty");
         }
 
-        BrokerCommand command = BrokerCommand.valueOf(split[0].toUpperCase());
+        String commandString = split[0].toUpperCase();
+        BrokerCommand command;
+        try {
+            command = BrokerCommand.valueOf(commandString);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid command");
+        }
 
         switch (command) {
             case ORDER:
-                return parsePost(split);
+                return parseOrder(split);
             case QUERY:
-                return parseGet(split);
+                return parseQuery(split);
             case EXIT:
                 return parseExit(split);
             default:
-                throw new IllegalArgumentException("Invalid arguments");
+                throw new IllegalArgumentException("Command not found");
         }
     }
 
-    private static ConsoleParser parseGet(String[] split) {
+    private static ConsoleParser parseQuery(String[] split) {
         if (split.length < 2) {
-            throw new IllegalArgumentException("Invalid arguments");
+            throw new IllegalArgumentException("Arguments must be more than 2");
         }
 
         return ConsoleParser.builder().command(BrokerCommand.QUERY)
@@ -48,15 +53,20 @@ public class ConsoleParser {
         return ConsoleParser.builder().command(BrokerCommand.EXIT).build();
     }
 
-    private static ConsoleParser parsePost(String[] split) {
+    private static ConsoleParser parseOrder(String[] split) {
         if (split.length < 6) {
-            throw new IllegalArgumentException("Invalid arguments");
+            throw new IllegalArgumentException("Arguments must be more than 6");
+        }
+
+        int quantity = Integer.parseInt(split[3]);
+        int price = Integer.parseInt(split[5]);
+        if (quantity <= 0 || price <= 0) {
+            throw new IllegalArgumentException("Quantity and price must be more than 0");
         }
 
         return ConsoleParser.builder().command(BrokerCommand.ORDER)
                 .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).instrument(split[2])
-                .quantity(Integer.parseInt(split[3])).market(split[4])
-                .price(Integer.parseInt(split[5])).build();
+                .quantity(quantity).market(split[4]).price(price).build();
     }
 
     public BrokerCommand getCommand() {

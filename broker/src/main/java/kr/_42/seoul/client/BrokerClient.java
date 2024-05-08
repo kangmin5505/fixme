@@ -1,13 +1,11 @@
 package kr._42.seoul.client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.NoSuchElementException;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
 import kr._42.seoul.server.BrokerServer;
 
 public class BrokerClient {
-    private static final Logger logger = LoggerFactory.getLogger(BrokerClient.class);
     private final BrokerServer brokerServer;
     private final RequestHandler requestHandler;
     private final ResponseHandler responseHandler;
@@ -20,13 +18,9 @@ public class BrokerClient {
     }
 
     public void run() {
-        logger.debug("BrokerClient is running");
-
         while (true) {
             try {
                 Request request = requestHandler.getRequest();
-
-                logger.debug(request.toString());
 
                 switch (request.getCommand()) {
                     case ORDER:
@@ -39,8 +33,10 @@ public class BrokerClient {
                     case EXIT:
                         System.exit(0);
                 }
+            } catch (NoSuchElementException e) { // EOF
+                System.exit(0);
             } catch (Exception e) {
-                logger.error("Error occurred while getting user request", e.getMessage());
+                responseHandler.error("Fail to request: " + e.getMessage());
                 continue;
             }
         }

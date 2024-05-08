@@ -12,4 +12,8 @@ public class ConsoleResponseHandler implements ResponseHandler {
         orderDetails.forEach(System.out::println);
     }
 
+    @Override
+    public void error(String message) {
+        System.out.println(message);
+    }
 }

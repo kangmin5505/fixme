@@ -4,7 +4,6 @@ import java.util.Scanner;
 import kr._42.seoul.common.Request;
 
 public class ConsoleRequestHandler implements RequestHandler {
-
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
