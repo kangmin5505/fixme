@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import kr._42.seoul.ClientSocket;
 import kr._42.seoul.FIXMessage;
 import kr._42.seoul.enums.MarketMsgType;
 import kr._42.seoul.field.Tag;
+import kr._42.seoul.repository.Order;
 import kr._42.seoul.repository.Repository;
 import kr._42.seoul.validator.TagValidator;
 import kr._42.seoul.validator.Validator;
@@ -22,6 +24,10 @@ public class Market extends ClientSocket {
     private final Repository repository;
     private static final Set<String> instruments = new HashSet<>();
     private Validator validator;
+
+    public static boolean isExistInstrument(String instrument) {
+        return instruments.contains(instrument);
+    }
 
     public Market(Set<String> instrumentsSet, Repository repository) {
         instrumentsSet.forEach(instruments::add);
@@ -56,19 +62,60 @@ public class Market extends ClientSocket {
         this.handleMessage(key, copy);
     }
 
-    public static boolean isExistInstrument(String instrument) {
-        return instruments.contains(instrument);
-    }
-
     private void handleMessage(SelectionKey key, ByteBuffer byteBuffer) {
         if (this.validator.validate(byteBuffer) == false) {
             this.sendInvalidMessage(key, byteBuffer);
             return;
         }
- 
-        // FIXMessage sendMessage =
-        // FIXMessage.builder().id(id).msgType(MarketMsgType.EXECUTED.toString())
-        // .instrument(instrument).quantity(quantity).price(price).brokerID(brokerID).build();
+
+        FIXMessage message = new FIXMessage(byteBuffer);
+        String msgType = (String) message.get(Tag.MSG_TYPE).getValue();
+
+        if (MarketMsgType.BUY.toString().equals(msgType)) {
+            this.handleBuy(key, message);
+        } else {
+            this.handleSell(key, message);
+        }
+    }
+
+    private void handleBuy(SelectionKey key, FIXMessage message) {
+        String instrument = (String) message.get(Tag.INSTRUMENT).getValue();
+        int quantity = (int) message.get(Tag.QUANTITY).getValue();
+        int price = (int) message.get(Tag.PRICE).getValue();
+
+        List<Order> orders = this.repository.findOrdersByInstrumentAndPrice(instrument, price);
+
+        for (Order order : orders) {
+            if (order.getQuantity() >= quantity) {
+                int remianQuantity = order.getQuantity() - quantity;
+                order.updateQuantity(remianQuantity);
+                
+                if (remianQuantity == 0) {
+                    this.repository.deleteOrder(order);
+                } else {
+                    this.repository.updateOrder(order);
+                }
+
+                FIXMessage response = FIXMessage.builder().id(id).msgType(MarketMsgType.EXECUTED.toString())
+                        .brokerID(order.getBrokerID()).instrument(instrument).quantity(quantity).price(price).build();
+                key.attach(response.toByteBuffer().array());
+                key.interestOps(SelectionKey.OP_WRITE);
+                return;
+            }
+        }
+
+        this.sendInvalidMessage(key, this.buffer);
+    }
+
+    private void handleSell(SelectionKey key, FIXMessage message) {
+        String brokerID = (String) message.get(Tag.ID).getValue();
+        String instrument = (String) message.get(Tag.INSTRUMENT).getValue();
+        int quantity = (int) message.get(Tag.QUANTITY).getValue();
+        int price = (int) message.get(Tag.PRICE).getValue();
+
+
+        this.repository.addOrder(Order.builder().brokerID(brokerID).instrument(instrument)
+                .quantity(quantity).price(price).build());
     }
 
     private void sendInvalidMessage(SelectionKey key, ByteBuffer byteBuffer) {

@@ -12,14 +12,14 @@
         },
         {
             "type": "java",
-            "name": "Main",
+            "name": "broker",
             "request": "launch",
             "mainClass": "kr._42.seoul.Main",
             "projectName": "broker"
         },
         {
             "type": "java",
-            "name": "Main(1)",
+            "name": "market",
             "request": "launch",
             "mainClass": "kr._42.seoul.Main",
             "projectName": "market",
@@ -27,7 +27,7 @@
         },
         {
             "type": "java",
-            "name": "Main(2)",
+            "name": "router",
             "request": "launch",
             "mainClass": "kr._42.seoul.Main",
             "projectName": "router"
