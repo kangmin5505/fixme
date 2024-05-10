@@ -22,12 +22,19 @@ public class ConsoleResponseHandler implements ResponseHandler {
                 case REJECTED:
                     this.handleRejected(message);
                     break;
+                case INVALID:
+                    this.handleInvalid(message);
+                    break;
                 default:
                     this.handleUnknown();
             }
         } catch (Exception e) {
             error("[Fail to handle response]\n\t" + e.getMessage());
         }
+    }
+
+    private void handleInvalid(FIXMessage message) {
+        System.out.println("[Invalid request]");
     }
 
     private void handleUnknown() {

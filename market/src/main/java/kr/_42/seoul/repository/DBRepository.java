@@ -43,7 +43,7 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public void addOrder(Order order) throws SQLException {
+    synchronized public void addOrder(Order order) throws SQLException {
         String sql = "INSERT INTO market (clientId, instrument, price, quantity) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = ds.getConnection();
@@ -88,7 +88,7 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public void updateOrder(Order order) throws SQLException {
+    synchronized public void updateOrder(Order order) throws SQLException {
         String sql = "UPDATE market SET quantity = ? WHERE id = ?";
 
         try (Connection conn = ds.getConnection();
@@ -100,7 +100,7 @@ public class DBRepository implements Repository {
     }
     
     @Override
-    public void deleteOrder(Order order) throws SQLException {
+    synchronized public void deleteOrder(Order order) throws SQLException {
         String sql = "DELETE FROM market WHERE id = ?";
 
         try (Connection conn = ds.getConnection();
@@ -109,5 +109,4 @@ public class DBRepository implements Repository {
             pstmt.executeUpdate();
         }
     }
-
 }

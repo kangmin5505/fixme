@@ -1,12 +1,15 @@
 package kr._42.seoul;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.broker.BrokerRouter;
 import kr._42.seoul.common.RouterMediator;
-import kr._42.seoul.common.ThreadPool;
 import kr._42.seoul.market.MarketRouter;
 
 public class Main {
@@ -21,31 +24,35 @@ public class Main {
         routerMediator.registerBrokerRouter(brokerRouter);
         routerMediator.registerMarketRouter(marketRouter);
 
+        try {
+            brokerRouter.open();
+            brokerRouter.bind(BROKER_PORT);
+            marketRouter.open();
+            marketRouter.bind(MARKET_PORT);
+        } catch (IOException e) {
+            logger.error("Failed to start routers", e);
+            System.exit(1);
+        }
+
         ExecutorService executorService = ThreadPool.getExecutorService();
-        executorService.submit(() -> {
+        List<Callable<Object>> tasks = new ArrayList<>();
+        Callable<Object> brokerRouterTask = Executors.callable(() -> {
             Thread.currentThread().setName("BrokerRouter");
-            try {
-                brokerRouter.open();
-                brokerRouter.bind(BROKER_PORT);
-                brokerRouter.run();
-            } catch (IOException e) {
-                logger.error("Error occurred while running broker router", e);
-                System.exit(1);
-            }
+            brokerRouter.run();
         });
-
-        executorService.submit(() -> {
+        Callable<Object> marketRouterTask = Executors.callable(() -> {
             Thread.currentThread().setName("MarketRouter");
-            try {
-                marketRouter.open();
-                marketRouter.bind(MARKET_PORT);
-                marketRouter.run();
-            } catch (IOException e) {
-                logger.error("Error occurred while running market router", e);
-                System.exit(1);
-            }
+            marketRouter.run();
         });
 
-        executorService.shutdown();
+        tasks.add(brokerRouterTask);
+        tasks.add(marketRouterTask);
+
+        try {
+            executorService.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            logger.error("Interrupted while running: ", e);
+            System.exit(1);
+        }
     }
 }

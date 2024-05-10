@@ -51,8 +51,6 @@ public class BrokerRouter extends ServerSocket {
 
         ByteBuffer copyByteBuffer = ByteBufferHelper.deepCopy(this.buffer);
         this.routerMediator.sendToMarketRouter(copyByteBuffer);
-
-        logger.info("Forwarding to MarketRouter: {}", new String(copyByteBuffer.array()));
     }
 
     protected void accept(SelectionKey key) throws IOException {

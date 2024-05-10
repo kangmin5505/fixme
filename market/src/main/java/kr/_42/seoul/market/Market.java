@@ -8,11 +8,13 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.ByteBufferHelper;
 import kr._42.seoul.ClientSocket;
 import kr._42.seoul.FIXMessage;
+import kr._42.seoul.ThreadPool;
 import kr._42.seoul.enums.MsgType;
 import kr._42.seoul.field.Tag;
 import kr._42.seoul.repository.Order;
@@ -21,6 +23,7 @@ import kr._42.seoul.validator.TagValidator;
 import kr._42.seoul.validator.Validator;
 
 public class Market extends ClientSocket {
+    private final static ExecutorService executorService = ThreadPool.getExecutorService();
     private final Logger logger = LoggerFactory.getLogger(Market.class);
     private final Repository repository;
     private static final Set<String> instruments = new HashSet<>();
@@ -64,21 +67,23 @@ public class Market extends ClientSocket {
     }
 
     private void handleMessage(SelectionKey key, ByteBuffer byteBuffer) {
-        if (this.validator.validate(byteBuffer) == false) {
-            this.sendInvalidMessage(key, byteBuffer);
-            return;
-        }
-
-        FIXMessage message = new FIXMessage(byteBuffer);
-        String msgType = (String) message.get(Tag.MSG_TYPE).getValue();
-
-        if (MsgType.BUY.toString().equals(msgType)) {
-            this.handleBuy(key, message);
-        } else if (MsgType.SELL.toString().equals(msgType)) {
-            this.handleSell(key, message);
-        } else {
-            logger.info("Unknown message type: {}", msgType);
-        }
+        executorService.submit(() -> {
+            if (this.validator.validate(byteBuffer) == false) {
+                this.sendInvalidMessage(key, byteBuffer);
+                return;
+            }
+    
+            FIXMessage message = new FIXMessage(byteBuffer);
+            String msgType = (String) message.get(Tag.MSG_TYPE).getValue();
+    
+            if (MsgType.BUY.toString().equals(msgType)) {
+                this.handleBuy(key, message);
+            } else if (MsgType.SELL.toString().equals(msgType)) {
+                this.handleSell(key, message);
+            } else {
+                logger.info("Unknown message type: {}", msgType);
+            }
+        });
     }
 
     private void handleBuy(SelectionKey key, FIXMessage message) {
@@ -106,6 +111,8 @@ public class Market extends ClientSocket {
 
                     key.attach(response.toByteBuffer().array());
                     key.interestOps(SelectionKey.OP_WRITE);
+
+                    logger.info("Order executed: {}", new String(response.toByteBuffer().array()));
                     return;
                 }
             }
@@ -132,11 +139,12 @@ public class Market extends ClientSocket {
 
             key.attach(response.toByteBuffer().array());
             key.interestOps(SelectionKey.OP_WRITE);
+
+            logger.info("Order executed: {}", new String(response.toByteBuffer().array()));
         } catch (SQLException e) {
             logger.error("Failed to add order: {}", e.getMessage());
             this.sendInvalidMessage(key, buffer);
         }
-
     }
 
     private void sendInvalidMessage(SelectionKey key, ByteBuffer byteBuffer) {

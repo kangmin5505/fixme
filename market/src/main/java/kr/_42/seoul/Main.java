@@ -1,6 +1,5 @@
 package kr._42.seoul;
 
-import java.io.IOException;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class Main {
             market.open();
             market.connect(HOSTNAME, PORT);
             market.run();
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Failed to start Market Server", e.getMessage());
             System.exit(1);
         }

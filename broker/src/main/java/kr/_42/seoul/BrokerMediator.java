@@ -1,12 +1,16 @@
 package kr._42.seoul;
 
+import java.util.concurrent.ExecutorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import kr._42.seoul.client.BrokerClient;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
 import kr._42.seoul.server.BrokerServer;
 
 public class BrokerMediator {
-
+    private static final ExecutorService executorService = ThreadPool.getExecutorService();
+    private final Logger logger = LoggerFactory.getLogger(BrokerMediator.class);
     private BrokerClient brokerClient;
     private BrokerServer brokerServer;
 
@@ -21,10 +25,16 @@ public class BrokerMediator {
     }
 
     public void sendToBrokerServer(Request request) {
-        this.brokerServer.order(request);
+        executorService.submit(() -> {
+            this.brokerServer.order(request);
+            logger.info("Order request: {}", request.toString());
+        });
     }
 
     public void sendToBrokerClient(Response response) {
-        this.brokerClient.receive(response);
+        executorService.submit(() -> {
+            this.brokerClient.receive(response);
+            logger.info("Received response");
+        });
     }
 }
