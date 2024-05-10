@@ -14,13 +14,13 @@ public class ConsoleRequestHandler implements RequestHandler {
 
         return Request.builder().command(consoleParser.getCommand())
                 .commandType(consoleParser.getCommandType()).market(consoleParser.getMarket())
-                .instrument(consoleParser.getInstrument()).quantity(consoleParser.getQuantity())
-                .price(consoleParser.getPrice()).build();
+                .instrument(consoleParser.getInstrument()).price(consoleParser.getPrice())
+                .quantity(consoleParser.getQuantity()).build();
     }
 
     private void printMessage() {
         System.out.println("Usage");
-        System.out.println("\t- [order] [sell|buy] [market] [instrument] [quantity] [price]");
+        System.out.println("\t- [order] [sell|buy] [market] [instrument] [price] [quantity]");
         System.out.println("\t- [query] [order_details]");
         System.out.println("\t- [exit]");
         System.out.print("> ");

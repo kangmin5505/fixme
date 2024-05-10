@@ -8,8 +8,8 @@ public class ConsoleParser {
     private BrokerCommandType commandType;
     private String market;
     private String instrument;
-    private int quantity;
     private int price;
+    private int quantity;
 
     private ConsoleParser() {}
 
@@ -58,15 +58,15 @@ public class ConsoleParser {
             throw new IllegalArgumentException("Arguments must be more than 6");
         }
 
-        int quantity = Integer.parseInt(split[4]);
-        int price = Integer.parseInt(split[5]);
-        if (quantity <= 0 || price <= 0) {
+        int price = Integer.parseInt(split[4]);
+        int quantity = Integer.parseInt(split[5]);
+        if (price <= 0 || quantity <= 0) {
             throw new IllegalArgumentException("Quantity and price must be more than 0");
         }
 
         return ConsoleParser.builder().command(BrokerCommand.ORDER)
                 .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).market(split[2]).instrument(split[3].toUpperCase())
-                .quantity(quantity).price(price).build();
+                .price(price).quantity(quantity).build();
     }
 
     public BrokerCommand getCommand() {
@@ -85,12 +85,12 @@ public class ConsoleParser {
         return this.instrument;
     }
 
-    public int getQuantity() {
-        return this.quantity;
-    }
-
     public int getPrice() {
         return this.price;
+    }
+
+    public int getQuantity() {
+        return this.quantity;
     }
 
     private static ConsoleParserBuilder builder() {
@@ -120,13 +120,13 @@ public class ConsoleParser {
             return this;
         }
 
-        private ConsoleParserBuilder quantity(int quantity) {
-            consoleParser.quantity = quantity;
+        private ConsoleParserBuilder price(int price) {
+            consoleParser.price = price;
             return this;
         }
 
-        private ConsoleParserBuilder price(int price) {
-            consoleParser.price = price;
+        private ConsoleParserBuilder quantity(int quantity) {
+            consoleParser.quantity = quantity;
             return this;
         }
 
