@@ -21,6 +21,7 @@ public class ConsoleRequestHandler implements RequestHandler {
     private void printMessage() {
         System.out.println("Usage");
         System.out.println("\t- [order] [sell|buy] [market] [instrument] [price] [quantity]");
+        System.out.println("\t- [message]");
         System.out.println("\t- [exit]");
         System.out.print("> ");
     }

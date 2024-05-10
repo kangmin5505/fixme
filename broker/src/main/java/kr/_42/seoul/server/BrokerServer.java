@@ -8,6 +8,7 @@ import java.nio.channels.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.BrokerMediator;
+import kr._42.seoul.ByteBufferHelper;
 import kr._42.seoul.ClientSocket;
 import kr._42.seoul.FIXMessage;
 import kr._42.seoul.common.Request;
@@ -56,7 +57,8 @@ public class BrokerServer extends ClientSocket {
             System.exit(1);
         }
 
-        this.brokerMediator.sendToBrokerClient(new Response(this.buffer));
+        ByteBuffer buffer = ByteBufferHelper.deepCopy(this.buffer);
+        this.brokerMediator.sendToBrokerClient(new Response(buffer));
     }
 
     protected void write(SelectionKey key) throws IOException {

@@ -21,7 +21,6 @@
         <sql-maven-plugin.version>3.0.0</sql-maven-plugin.version>
         <sql.create-data.phase>package</sql.create-data.phase>
         <sql.srcFile.create-tables>src/main/resources/sql/create-tables.sql</sql.srcFile.create-tables>
-        <sql.srcFile.insert-data>src/main/resources/sql/insert-data.sql</sql.srcFile.insert-data>
     </properties>
     
     <dependencies>
@@ -79,7 +78,6 @@
                             <!-- <autocommit>true</autocommit> -->
                             <srcFiles>
                                 <srcFile>${sql.srcFile.create-tables}</srcFile>
-                                <!-- <srcFile>${sql.srcFile.insert-data}</srcFile> -->
                             </srcFiles>
                         </configuration>
                     </execution>

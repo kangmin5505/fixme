@@ -40,13 +40,11 @@ public class ConsoleResponseHandler implements ResponseHandler {
     }
 
     private void handleExecuted(FIXMessage message) {
-        String market = (String) message.get(Tag.MARKET).getValue();
         String instrument = (String) message.get(Tag.INSTRUMENT).getValue();
         int price = (int) message.get(Tag.PRICE).getValue();
         int quantity = (int) message.get(Tag.QUANTITY).getValue();
 
         System.out.println("[Order Executed]");
-        System.out.println("\tMarket: " + market);
         System.out.println("\tInstrument: " + instrument);
         System.out.println("\tPrice: " + price);
         System.out.println("\tQuantity: " + quantity);

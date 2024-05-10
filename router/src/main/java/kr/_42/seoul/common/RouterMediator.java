@@ -73,7 +73,6 @@ public class RouterMediator {
         logger.info("Sending invalid message to broker client: {}", brokerID);
     }
 
-
     private void sendToMarketInvalidMessage(ByteBuffer byteBuffer) {
         FIXMessage fixMessage = new FIXMessage(byteBuffer);
         String marketID = (String) fixMessage.get(Tag.ID).getValue();

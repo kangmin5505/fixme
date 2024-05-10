@@ -31,11 +31,17 @@ public class ConsoleParser {
         switch (command) {
             case ORDER:
                 return parseOrder(split);
+            case MESSAGE:
+                return parseMessage(split);
             case EXIT:
                 return parseExit(split);
             default:
                 throw new IllegalArgumentException("Command not found");
         }
+    }
+
+    private static ConsoleParser parseMessage(String[] split) {
+        return ConsoleParser.builder().command(BrokerCommand.MESSAGE).build();
     }
 
     private static ConsoleParser parseExit(String[] split) {

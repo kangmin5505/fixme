@@ -1,16 +1,16 @@
 package kr._42.seoul.repository;
 
 public class Order {
-    private Long orderID;
+    private Long id;
     private String brokerID;
     private String instrument;
     private int quantity;
     private int price;
 
-    public Long getOrderID() {
-        return this.orderID;
+    public Long getId() {
+        return this.id;
     }
-    
+
     public String getBrokerID() {
         return brokerID;
     }
@@ -27,21 +27,21 @@ public class Order {
         return price;
     }
 
-    public void setOrderID(Long orderID) {
-        this.orderID = orderID;
+    public void setId(Long orderID) {
+        this.id = orderID;
     }
 
-    public void updateQuantity(int remianQuantity) {
-        this.quantity = remianQuantity;
+    public void minusQuantity(int quantity) {
+        this.quantity -= quantity;
     }
 
     public static OrderBuilder builder() {
         return new OrderBuilder();
     }
-    
+
     @Override
     public String toString() {
-        return "Order [brokerID=" + brokerID + ", instrument=" + instrument
+        return "Order [id=" + id + ", brokerID=" + brokerID + ", instrument=" + instrument
                 + ", quantity=" + quantity + ", price=" + price + "]";
     }
 
@@ -49,6 +49,11 @@ public class Order {
 
     public static class OrderBuilder {
         private Order order = new Order();
+
+        public OrderBuilder id(Long id) {
+            order.id = id;
+            return this;
+        }
 
         public OrderBuilder brokerID(String brokerID) {
             order.brokerID = brokerID;

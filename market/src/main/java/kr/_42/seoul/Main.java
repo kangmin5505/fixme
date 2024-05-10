@@ -20,28 +20,20 @@ public class Main {
             logger.error("Usage: java -jar market.jar [instrument1] [instrument2] ...");
             System.exit(1);
         }
-
-        // Repository repository = MemoryRepository.getInstance();
-        Repository repository = DBRepository.getInstance();
         
         try {
+            Repository repository = DBRepository.getInstance();
             repository.init();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
-        Set<String> instruments = InstrumentRegister.getInstruments();
-        Market market = new Market(instruments, repository);
+            Set<String> instruments = InstrumentRegister.getInstruments();
+            Market market = new Market(instruments, repository);
 
-        try {
             market.open();
             market.connect(HOSTNAME, PORT);
+            market.run();
         } catch (IOException e) {
             logger.error("Failed to start Market Server", e.getMessage());
             System.exit(1);
         }
-
-        market.run();
     }
 }

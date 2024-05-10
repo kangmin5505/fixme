@@ -26,17 +26,15 @@ public class BrokerClient {
 
     public void run() {
         while (true) {
-            if (this.queue.isEmpty() == false) {
-                handleResponse();
-            }
-
             try {
                 Request request = requestHandler.getRequest();
                 BrokerCommand command = request.getCommand();
                 
                 if (command == BrokerCommand.ORDER) {
                     brokerMediator.sendToBrokerServer(request);
-                } else if (command == BrokerCommand.EXIT) {
+                } else if (command == BrokerCommand.MESSAGE) {
+                    this.handleResponse();
+                } else {
                     System.exit(0);
                 }
             } catch (NoSuchElementException e) { // EOF

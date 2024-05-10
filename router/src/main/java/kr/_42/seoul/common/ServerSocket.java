@@ -27,7 +27,7 @@ public abstract class ServerSocket {
         this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
     }
     
-    public void run() throws IOException {
+    public void run() {
         logger.info("{} is running", this.getClass().getSimpleName());
         
         while (true) {
@@ -49,7 +49,7 @@ public abstract class ServerSocket {
                 }
 
                 this.selector.selectedKeys().clear();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 this.logger.error("Error occurred while selecting keys", e);
                 e.printStackTrace();
             }

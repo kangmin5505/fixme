@@ -17,7 +17,7 @@ public class MemoryRepository implements Repository {
 
     @Override
     public void addOrder(Order order) {
-        order.setOrderID(orderID);
+        order.setId(orderID);
         orders.put(orderID++, order);
 
         this.printAllOrders();
@@ -37,15 +37,14 @@ public class MemoryRepository implements Repository {
 
     @Override
     public void updateOrder(Order order) {
-        orders.put(order.getOrderID(), order);
+        orders.put(order.getId(), order);
     }
 
     @Override
     public void deleteOrder(Order order) {
-        orders.remove(order.getOrderID());
+        orders.remove(order.getId());
     }
 
     @Override
-    public void init() {
-    }
+    public void init() {}
 }

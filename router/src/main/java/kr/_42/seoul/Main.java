@@ -1,5 +1,6 @@
 package kr._42.seoul;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class Main {
                 brokerRouter.open();
                 brokerRouter.bind(BROKER_PORT);
                 brokerRouter.run();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 logger.error("Error occurred while running broker router", e);
                 System.exit(1);
             }
@@ -39,7 +40,7 @@ public class Main {
                 marketRouter.open();
                 marketRouter.bind(MARKET_PORT);
                 marketRouter.run();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 logger.error("Error occurred while running market router", e);
                 System.exit(1);
             }

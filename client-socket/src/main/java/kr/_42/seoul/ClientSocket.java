@@ -65,7 +65,7 @@ public abstract class ClientSocket {
                 }
     
                 this.selector.selectedKeys().clear();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 this.logger.error("Error occurred while selecting keys", e);
                 e.printStackTrace();
             }            

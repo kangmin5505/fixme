@@ -74,40 +74,45 @@ public class Market extends ClientSocket {
 
         if (MsgType.BUY.toString().equals(msgType)) {
             this.handleBuy(key, message);
-        } else {
+        } else if (MsgType.SELL.toString().equals(msgType)) {
             this.handleSell(key, message);
+        } else {
+            logger.info("Unknown message type: {}", msgType);
         }
     }
 
     private void handleBuy(SelectionKey key, FIXMessage message) {
+        String buyerId = (String) message.get(Tag.ID).getValue();
         String instrument = (String) message.get(Tag.INSTRUMENT).getValue();
         int quantity = (int) message.get(Tag.QUANTITY).getValue();
         int price = (int) message.get(Tag.PRICE).getValue();
 
-        try {       
+        try {
             List<Order> orders = this.repository.findOrdersByInstrumentAndPrice(instrument, price);
 
             for (Order order : orders) {
                 if (order.getQuantity() >= quantity) {
-                    int remianQuantity = order.getQuantity() - quantity;
-                    order.updateQuantity(remianQuantity);
-                    
-                    if (remianQuantity == 0) {
+                    order.minusQuantity(quantity);
+
+                    if (order.getQuantity() == 0) {
                         this.repository.deleteOrder(order);
                     } else {
                         this.repository.updateOrder(order);
                     }
 
                     FIXMessage response = FIXMessage.builder().id(id).msgType(MsgType.EXECUTED)
-                            .brokerID(order.getBrokerID()).instrument(instrument).quantity(quantity).price(price).build();
+                            .brokerID(buyerId).instrument(instrument).quantity(quantity)
+                            .price(price).build();
+
                     key.attach(response.toByteBuffer().array());
                     key.interestOps(SelectionKey.OP_WRITE);
                     return;
                 }
             }
+
             this.sendInvalidMessage(key, this.buffer);
         } catch (SQLException e) {
-            this.sendInvalidMessage(key, this.buffer);            
+            this.sendInvalidMessage(key, this.buffer);
         }
     }
 
@@ -119,7 +124,14 @@ public class Market extends ClientSocket {
 
         try {
             this.repository.addOrder(Order.builder().brokerID(brokerID).instrument(instrument)
-            .quantity(quantity).price(price).build());
+                    .quantity(quantity).price(price).build());
+
+            FIXMessage response = FIXMessage.builder().id(id).msgType(MsgType.EXECUTED)
+                .brokerID(brokerID).instrument(instrument).quantity(quantity)
+                .price(price).build();
+
+            key.attach(response.toByteBuffer().array());
+            key.interestOps(SelectionKey.OP_WRITE);
         } catch (SQLException e) {
             logger.error("Failed to add order: {}", e.getMessage());
             this.sendInvalidMessage(key, buffer);
@@ -130,8 +142,8 @@ public class Market extends ClientSocket {
     private void sendInvalidMessage(SelectionKey key, ByteBuffer byteBuffer) {
         FIXMessage message = new FIXMessage(byteBuffer);
         String brokerID = (String) message.get(Tag.ID).getValue();
-        FIXMessage invalidMessage = FIXMessage.builder().id(id)
-                .msgType(MsgType.REJECTED).brokerID(brokerID).build();
+        FIXMessage invalidMessage =
+                FIXMessage.builder().id(id).msgType(MsgType.REJECTED).brokerID(brokerID).build();
 
         key.attach(invalidMessage.toByteBuffer().array());
         key.interestOps(SelectionKey.OP_WRITE);
