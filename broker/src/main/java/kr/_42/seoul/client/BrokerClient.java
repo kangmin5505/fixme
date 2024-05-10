@@ -1,8 +1,8 @@
 package kr._42.seoul.client;
 
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import kr._42.seoul.BrokerMediator;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
@@ -12,7 +12,7 @@ public class BrokerClient {
     private final RequestHandler requestHandler;
     private final ResponseHandler responseHandler;
     private BrokerMediator brokerMediator;
-    private final Queue<Response> queue = new LinkedList<>();
+    private final Queue<Response> queue = new ConcurrentLinkedQueue<>();
 
     public BrokerClient(RequestHandler requestHandler,
             ResponseHandler responseHandler) {
