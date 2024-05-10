@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -83,28 +84,31 @@ public class Market extends ClientSocket {
         int quantity = (int) message.get(Tag.QUANTITY).getValue();
         int price = (int) message.get(Tag.PRICE).getValue();
 
-        List<Order> orders = this.repository.findOrdersByInstrumentAndPrice(instrument, price);
+        try {       
+            List<Order> orders = this.repository.findOrdersByInstrumentAndPrice(instrument, price);
 
-        for (Order order : orders) {
-            if (order.getQuantity() >= quantity) {
-                int remianQuantity = order.getQuantity() - quantity;
-                order.updateQuantity(remianQuantity);
-                
-                if (remianQuantity == 0) {
-                    this.repository.deleteOrder(order);
-                } else {
-                    this.repository.updateOrder(order);
+            for (Order order : orders) {
+                if (order.getQuantity() >= quantity) {
+                    int remianQuantity = order.getQuantity() - quantity;
+                    order.updateQuantity(remianQuantity);
+                    
+                    if (remianQuantity == 0) {
+                        this.repository.deleteOrder(order);
+                    } else {
+                        this.repository.updateOrder(order);
+                    }
+
+                    FIXMessage response = FIXMessage.builder().id(id).msgType(MarketMsgType.EXECUTED.toString())
+                            .brokerID(order.getBrokerID()).instrument(instrument).quantity(quantity).price(price).build();
+                    key.attach(response.toByteBuffer().array());
+                    key.interestOps(SelectionKey.OP_WRITE);
+                    return;
                 }
-
-                FIXMessage response = FIXMessage.builder().id(id).msgType(MarketMsgType.EXECUTED.toString())
-                        .brokerID(order.getBrokerID()).instrument(instrument).quantity(quantity).price(price).build();
-                key.attach(response.toByteBuffer().array());
-                key.interestOps(SelectionKey.OP_WRITE);
-                return;
             }
+            this.sendInvalidMessage(key, this.buffer);
+        } catch (SQLException e) {
+            this.sendInvalidMessage(key, this.buffer);            
         }
-
-        this.sendInvalidMessage(key, this.buffer);
     }
 
     private void handleSell(SelectionKey key, FIXMessage message) {
@@ -113,9 +117,14 @@ public class Market extends ClientSocket {
         int quantity = (int) message.get(Tag.QUANTITY).getValue();
         int price = (int) message.get(Tag.PRICE).getValue();
 
+        try {
+            this.repository.addOrder(Order.builder().brokerID(brokerID).instrument(instrument)
+            .quantity(quantity).price(price).build());
+        } catch (SQLException e) {
+            logger.error("Failed to add order: {}", e.getMessage());
+            this.sendInvalidMessage(key, buffer);
+        }
 
-        this.repository.addOrder(Order.builder().brokerID(brokerID).instrument(instrument)
-                .quantity(quantity).price(price).build());
     }
 
     private void sendInvalidMessage(SelectionKey key, ByteBuffer byteBuffer) {

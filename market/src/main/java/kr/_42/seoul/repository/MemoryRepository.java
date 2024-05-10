@@ -44,4 +44,8 @@ public class MemoryRepository implements Repository {
     public void deleteOrder(Order order) {
         orders.remove(order.getOrderID());
     }
+
+    @Override
+    public void init() {
+    }
 }

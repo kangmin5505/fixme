@@ -13,6 +13,15 @@
 
     <properties>
         <mainClass>${project.groupId}.Main</mainClass>
+        <h2.version>2.2.224</h2.version>
+        <hikari.version>5.1.0</hikari.version>
+        <sql.url>jdbc:h2:~/Desktop/fixme/market/src/main/resources/db</sql.url>
+        <sql.username>sa</sql.username>
+        <sql.password></sql.password>
+        <sql-maven-plugin.version>3.0.0</sql-maven-plugin.version>
+        <sql.create-data.phase>package</sql.create-data.phase>
+        <sql.srcFile.create-tables>src/main/resources/sql/create-tables.sql</sql.srcFile.create-tables>
+        <sql.srcFile.insert-data>src/main/resources/sql/insert-data.sql</sql.srcFile.insert-data>
     </properties>
     
     <dependencies>
@@ -26,5 +35,56 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+                <version>${sql-maven-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                        <version>${h2.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <driver>org.h2.Driver</driver>
+                    <url>${sql.url}</url>
+                    <username>${sql.username}</username>
+                    <password>${sql.password}</password>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>create-data</id>
+                        <phase>${sql.create-data.phase}</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <!-- specific configuration for this execution -->
+                        <configuration>
+                            <!-- <autocommit>true</autocommit> -->
+                            <srcFiles>
+                                <srcFile>${sql.srcFile.create-tables}</srcFile>
+                                <!-- <srcFile>${sql.srcFile.insert-data}</srcFile> -->
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

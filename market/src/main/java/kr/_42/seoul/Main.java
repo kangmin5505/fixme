@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.market.InstrumentRegister;
 import kr._42.seoul.market.Market;
-import kr._42.seoul.repository.MemoryRepository;
+import kr._42.seoul.repository.DBRepository;
 import kr._42.seoul.repository.Repository;
 
 public class Main {
@@ -21,8 +21,15 @@ public class Main {
             System.exit(1);
         }
 
-        Repository repository = MemoryRepository.getInstance();
-        // Repository repository = new DBRepository();
+        // Repository repository = MemoryRepository.getInstance();
+        Repository repository = DBRepository.getInstance();
+        
+        try {
+            repository.init();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Set<String> instruments = InstrumentRegister.getInstruments();
         Market market = new Market(instruments, repository);
