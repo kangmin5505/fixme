@@ -6,10 +6,10 @@ import kr._42.seoul.enums.BrokerCommandType;
 public class ConsoleParser {
     private BrokerCommand command;
     private BrokerCommandType commandType;
+    private String market;
     private String instrument;
     private int quantity;
     private int price;
-    private String market;
 
     private ConsoleParser() {}
 
@@ -58,15 +58,15 @@ public class ConsoleParser {
             throw new IllegalArgumentException("Arguments must be more than 6");
         }
 
-        int quantity = Integer.parseInt(split[3]);
+        int quantity = Integer.parseInt(split[4]);
         int price = Integer.parseInt(split[5]);
         if (quantity <= 0 || price <= 0) {
             throw new IllegalArgumentException("Quantity and price must be more than 0");
         }
 
         return ConsoleParser.builder().command(BrokerCommand.ORDER)
-                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).instrument(split[2].toUpperCase())
-                .quantity(quantity).market(split[4]).price(price).build();
+                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).market(split[2]).instrument(split[3].toUpperCase())
+                .quantity(quantity).price(price).build();
     }
 
     public BrokerCommand getCommand() {
@@ -75,6 +75,10 @@ public class ConsoleParser {
 
     public BrokerCommandType getCommandType() {
         return this.commandType;
+    }
+
+    public String getMarket() {
+        return this.market;
     }
 
     public String getInstrument() {
@@ -87,10 +91,6 @@ public class ConsoleParser {
 
     public int getPrice() {
         return this.price;
-    }
-
-    public String getMarket() {
-        return this.market;
     }
 
     private static ConsoleParserBuilder builder() {
@@ -110,6 +110,11 @@ public class ConsoleParser {
             return this;
         }
 
+        private ConsoleParserBuilder market(String market) {
+            consoleParser.market = market;
+            return this;
+        }
+
         private ConsoleParserBuilder instrument(String instrument) {
             consoleParser.instrument = instrument;
             return this;
@@ -125,11 +130,6 @@ public class ConsoleParser {
             return this;
         }
 
-        private ConsoleParserBuilder market(String market) {
-            consoleParser.market = market;
-            return this;
-        }
-
         private ConsoleParser build() {
             return consoleParser;
         }
@@ -137,8 +137,8 @@ public class ConsoleParser {
 
     @Override
     public String toString() {
-        return "ConsoleParser [command=" + command + ", commandType=" + commandType
-                + ", instrument=" + instrument + ", quantity=" + quantity + ", price=" + price
-                + ", market=" + market + "]";
+        return "ConsoleParser [command=" + command + ", commandType=" + commandType + ", market="
+                + market + ", instrument=" + instrument + ", quantity=" + quantity + ", price="
+                + price + "]";
     }
 }
