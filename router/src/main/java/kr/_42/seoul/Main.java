@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.broker.BrokerRouter;
-import kr._42.seoul.common.Mediator;
+import kr._42.seoul.common.RouterMediator;
 import kr._42.seoul.common.ThreadPool;
 import kr._42.seoul.market.MarketRouter;
 
@@ -16,12 +16,13 @@ public class Main {
     public static void main(String[] args) {
         BrokerRouter brokerRouter = new BrokerRouter();
         MarketRouter marketRouter = new MarketRouter();
-        Mediator mediator = new Mediator();
-        mediator.registerBrokerRouter(brokerRouter);
-        mediator.registerMarketRouter(marketRouter);
+        RouterMediator routerMediator = new RouterMediator();
+        routerMediator.registerBrokerRouter(brokerRouter);
+        routerMediator.registerMarketRouter(marketRouter);
 
         ExecutorService executorService = ThreadPool.getExecutorService();
         executorService.submit(() -> {
+            Thread.currentThread().setName("BrokerRouter");
             try {
                 brokerRouter.open();
                 brokerRouter.bind(BROKER_PORT);
@@ -33,6 +34,7 @@ public class Main {
         });
 
         executorService.submit(() -> {
+            Thread.currentThread().setName("MarketRouter");
             try {
                 marketRouter.open();
                 marketRouter.bind(MARKET_PORT);
@@ -42,12 +44,7 @@ public class Main {
                 System.exit(1);
             }
         });
+
         executorService.shutdown();
-
-        // Mediator mediator = new Mediator(brokerRouter, marketRouter);
-        // executorService.submit(() -> {
-        // mediator.run();
-        // });
-
     }
 }

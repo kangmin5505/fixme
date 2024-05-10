@@ -3,6 +3,7 @@ package kr._42.seoul;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import kr._42.seoul.enums.MsgType;
 import kr._42.seoul.field.FIXBrokerID;
 import kr._42.seoul.field.FIXChecksum;
 import kr._42.seoul.field.FIXID;
@@ -101,8 +102,8 @@ public class FIXMessage {
             return this;
         }
 
-        public FIXMessageBuilder msgType(String value) {
-            this.fixMessage.body.put(Tag.MSG_TYPE, new FIXMsgType(value));
+        public FIXMessageBuilder msgType(MsgType value) {
+            this.fixMessage.body.put(Tag.MSG_TYPE, new FIXMsgType(value.toString()));
             return this;
         }
 

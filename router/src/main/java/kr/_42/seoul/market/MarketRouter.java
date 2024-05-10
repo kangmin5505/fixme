@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.ByteBufferHelper;
 import kr._42.seoul.common.IDGenerator;
-import kr._42.seoul.common.Mediator;
+import kr._42.seoul.common.RouterMediator;
 import kr._42.seoul.common.ServerSocket;
 
 public class MarketRouter extends ServerSocket {
     private final Logger logger = LoggerFactory.getLogger(MarketRouter.class);
     private final static IDGenerator idGenerator = new IDGenerator();
     private final static Map<String, SocketChannel> marketClients = new HashMap<>();
-    private Mediator mediator;
+    private RouterMediator mediator;
 
     public static boolean isExistMarketClient(String marketID) {
         return marketClients.containsKey(marketID);
@@ -53,8 +53,7 @@ public class MarketRouter extends ServerSocket {
         ByteBuffer copyByteBuffer = ByteBufferHelper.deepCopy(this.buffer);
         this.mediator.sendToBrokerRouter(copyByteBuffer);
 
-        logger.info("Forwarding to BrokerRouter: {}",
-                new String(copyByteBuffer.array()));
+        logger.info("Forwarding to BrokerRouter: {}", new String(copyByteBuffer.array()));
     }
 
     protected void accept(SelectionKey key) throws IOException {
@@ -69,7 +68,7 @@ public class MarketRouter extends ServerSocket {
         clientKey.attach(clientID.getBytes());
     }
 
-    public void registerMediator(Mediator mediator) {
+    public void registerMediator(RouterMediator mediator) {
         this.mediator = mediator;
     }
 
@@ -78,7 +77,8 @@ public class MarketRouter extends ServerSocket {
         byte[] bytes = byteBuffer.array();
 
         try {
-            SelectionKey selectionKey = marketClientSocket.register(this.selector, SelectionKey.OP_WRITE);
+            SelectionKey selectionKey =
+                    marketClientSocket.register(this.selector, SelectionKey.OP_WRITE);
             selectionKey.attach(bytes);
         } catch (ClosedChannelException e) {
             logger.error("Failed to register channel with selector", e);

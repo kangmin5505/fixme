@@ -5,36 +5,27 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import kr._42.seoul.BrokerMediator;
 import kr._42.seoul.ClientSocket;
 import kr._42.seoul.FIXMessage;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
-import kr._42.seoul.enums.BrokerCommandType;
-import kr._42.seoul.enums.ResponseStatusCode;
-import kr._42.seoul.server.repository.Repository;
+import kr._42.seoul.enums.MsgType;
 
 public class BrokerServer extends ClientSocket {
-    public final ResponseStatusCode SUCCESS = ResponseStatusCode.SUCCESS;
-    public final ResponseStatusCode FAILURE = ResponseStatusCode.FAILURE;
-
     private final Logger logger = LoggerFactory.getLogger(BrokerServer.class);
-    private final Repository repository;
-
-    public BrokerServer(Repository repository) {
-        this.repository = repository;
-    }
+    private BrokerMediator brokerMediator;
 
     public void order(Request request) {
-        if (request.getCommandType() != BrokerCommandType.BUY
-                && request.getCommandType() != BrokerCommandType.SELL) {
+        if (request.getMsgType() != MsgType.BUY && request.getMsgType() != MsgType.SELL) {
             return;
         }
-        
+
         try {
-            SelectionKey selectionKey = this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
+            SelectionKey selectionKey =
+                    this.socketChannel.register(this.selector, SelectionKey.OP_WRITE);
             byte[] bytes = requestToFIXMessage(request).toByteBuffer().array();
             selectionKey.attach(bytes);
         } catch (ClosedChannelException e) {
@@ -42,31 +33,16 @@ public class BrokerServer extends ClientSocket {
         }
 
         this.selector.wakeup();
+    }
 
-        // this.repository.addOrderDetail(OrderDetail.builder().orderType(request.getCommandType())
-        // .orderStatus(OrderStatus.PENDING).instrument(request.getInstrument())
-        // .quantity(request.getQuantity()).price(request.getPrice())
-        // .market(request.getMarket()).build());
+    public void registerBrokerMediator(BrokerMediator brokerMediator) {
+        this.brokerMediator = brokerMediator;
     }
 
     private FIXMessage requestToFIXMessage(Request request) {
-        return FIXMessage.builder()
-        .id(id)
-        .msgType(request.getCommandType().toString())
-        .instrument(request.getInstrument())
-        .quantity(request.getQuantity())
-        .price(request.getPrice())
-        .market(request.getMarket())
-        .build();
-    }
-
-    public Response query(Request request) {
-        if (request.getCommandType() != BrokerCommandType.ORDER_DETAILS) {
-            return new Response(ResponseStatusCode.FAILURE, null, "Invalid Request");
-        }
-
-        List<OrderDetail> orderDetails = this.repository.getOrderDetails();
-        return new Response(ResponseStatusCode.SUCCESS, orderDetails, "Order Details");
+        return FIXMessage.builder().id(id).msgType(request.getMsgType())
+                .market(request.getMarket()).instrument(request.getInstrument())
+                .price(request.getPrice()).quantity(request.getQuantity()).build();
     }
 
     protected void read(SelectionKey key) throws IOException {
@@ -80,7 +56,7 @@ public class BrokerServer extends ClientSocket {
             System.exit(1);
         }
 
-        logger.info("Reading from router: {}", new String(this.buffer.array()).trim());
+        this.brokerMediator.sendToBrokerClient(new Response(this.buffer));
     }
 
     protected void write(SelectionKey key) throws IOException {
@@ -91,7 +67,5 @@ public class BrokerServer extends ClientSocket {
 
         client.write(byteBuffer);
         key.interestOps(SelectionKey.OP_READ);
-
-        logger.info("Sending to router: {}", new String(bytes));
     }
 }

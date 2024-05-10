@@ -28,6 +28,8 @@ public abstract class ServerSocket {
     }
     
     public void run() throws IOException {
+        logger.info("{} is running", this.getClass().getSimpleName());
+        
         while (true) {
             try {
                 this.selector.select();

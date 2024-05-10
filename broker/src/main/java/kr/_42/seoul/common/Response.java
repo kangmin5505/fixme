@@ -1,28 +1,17 @@
 package kr._42.seoul.common;
 
-import kr._42.seoul.enums.ResponseStatusCode;
+import java.nio.ByteBuffer;
+import kr._42.seoul.ByteBufferHelper;
+import kr._42.seoul.FIXMessage;
 
 public class Response {
-    private final ResponseStatusCode responseStatusCode;
-    private final Object data;
-    private final String message;
+    private final ByteBuffer byteBuffer;
 
-    public Response(ResponseStatusCode responseStatusCode, Object data, String message) {
-        this.responseStatusCode = responseStatusCode;
-        this.data = data;
-        this.message = message;
+    public Response(ByteBuffer buffer) {
+        this.byteBuffer = ByteBufferHelper.deepCopy(buffer);
     }
 
-    public ResponseStatusCode getResponseStatusCode() {
-        return responseStatusCode;
+    public FIXMessage getFixMessage() {
+        return new FIXMessage(this.byteBuffer);
     }
-
-    public Object getData() {
-        return data;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
 }

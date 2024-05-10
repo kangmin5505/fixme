@@ -3,6 +3,7 @@ package kr._42.seoul;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;
+import kr._42.seoul.enums.MsgType;
 
 public class FIXMessageTest {
 
@@ -14,7 +15,7 @@ public class FIXMessageTest {
         String message = new String(fixMessage.toByteBuffer().array());
 
         FIXMessage fixMessage2 =
-                FIXMessage.builder().id("123456").msgType("SELL").instrument("instrument")
+                FIXMessage.builder().id("123456").msgType(MsgType.SELL).instrument("instrument")
                         .quantity(100).price(1000).market("KRX").brokerID("broker").build();
 
         String message2 = new String(fixMessage2.toByteBuffer().array());

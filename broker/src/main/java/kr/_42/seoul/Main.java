@@ -9,8 +9,6 @@ import kr._42.seoul.client.ConsoleRequestHandler;
 import kr._42.seoul.client.ConsoleResponseHandler;
 import kr._42.seoul.common.ThreadPool;
 import kr._42.seoul.server.BrokerServer;
-import kr._42.seoul.server.repository.MemoryRepository;
-import kr._42.seoul.server.repository.Repository;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -18,23 +16,22 @@ public class Main {
     private static final int PORT = 5000;
 
     public static void main(String[] args) {
-        Repository repository = MemoryRepository.getInstance();
-        // Repository repository = new DBRepository();
-
-        BrokerServer brokerServer = new BrokerServer(repository);
-
-        BrokerClient brokerClient = new BrokerClient(brokerServer, new ConsoleRequestHandler(),
+        BrokerServer brokerServer = new BrokerServer();
+        BrokerClient brokerClient = new BrokerClient(new ConsoleRequestHandler(),
                 new ConsoleResponseHandler());
-        ExecutorService executorService = ThreadPool.getExecutorService();
+        BrokerMediator brokerMediator = new BrokerMediator();
+        brokerMediator.registerBrokerClient(brokerClient);
+        brokerMediator.registerBrokerServer(brokerServer);
 
         try {
             brokerServer.open();
             brokerServer.connect(HOSTNAME, PORT);
         } catch (IOException e) {
-            logger.error("Failed to start Market Server", e.getMessage());
+            logger.error("Failed to start Broker Server", e.getMessage());
             System.exit(1);
         }
 
+        ExecutorService executorService = ThreadPool.getExecutorService();
         executorService.submit(() -> {
             Thread.currentThread().setName("BrokerServer");
             brokerServer.run();

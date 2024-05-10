@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.ByteBufferHelper;
 import kr._42.seoul.common.IDGenerator;
-import kr._42.seoul.common.Mediator;
+import kr._42.seoul.common.RouterMediator;
 import kr._42.seoul.common.ServerSocket;
 
 public class BrokerRouter extends ServerSocket {
     private final static Logger logger = LoggerFactory.getLogger(BrokerRouter.class);
     private final static IDGenerator idGenerator = new IDGenerator();
     private final static Map<String, SocketChannel> brokerClients = new HashMap<>();
-    private Mediator mediator;
+    private RouterMediator routerMediator;
 
     public static boolean isExistBrokerClient(String brokerID) {
         return brokerClients.containsKey(brokerID);
@@ -50,10 +50,9 @@ public class BrokerRouter extends ServerSocket {
         }
 
         ByteBuffer copyByteBuffer = ByteBufferHelper.deepCopy(this.buffer);
-        this.mediator.sendToMarketRouter(copyByteBuffer);
+        this.routerMediator.sendToMarketRouter(copyByteBuffer);
 
-        logger.info("Forwarding to MarketRouter: {}",
-                new String(copyByteBuffer.array()));
+        logger.info("Forwarding to MarketRouter: {}", new String(copyByteBuffer.array()));
     }
 
     protected void accept(SelectionKey key) throws IOException {
@@ -68,8 +67,8 @@ public class BrokerRouter extends ServerSocket {
         clientKey.attach(clientID.getBytes());
     }
 
-    public void registerMediator(Mediator mediator) {
-        this.mediator = mediator;
+    public void registerRouterMediator(RouterMediator routerMediator) {
+        this.routerMediator = routerMediator;
     }
 
     public void sendToBroker(ByteBuffer byteBuffer, String brokerID) {
@@ -77,7 +76,8 @@ public class BrokerRouter extends ServerSocket {
         byte[] bytes = byteBuffer.array();
 
         try {
-            SelectionKey selectionKey = brokerClientSocket.register(this.selector, SelectionKey.OP_WRITE);
+            SelectionKey selectionKey =
+                    brokerClientSocket.register(this.selector, SelectionKey.OP_WRITE);
             selectionKey.attach(bytes);
         } catch (ClosedChannelException e) {
             logger.error("Failed to register channel with selector", e);

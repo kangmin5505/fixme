@@ -1,11 +1,11 @@
 package kr._42.seoul.common;
 
 import kr._42.seoul.enums.BrokerCommand;
-import kr._42.seoul.enums.BrokerCommandType;
+import kr._42.seoul.enums.MsgType;
 
 public class Request {
     private BrokerCommand command;
-    private BrokerCommandType commandType;
+    private MsgType msgType;
     private String instrument;
     private int quantity;
     private int price;
@@ -21,8 +21,8 @@ public class Request {
         return command;
     }
 
-    public BrokerCommandType getCommandType() {
-        return commandType;
+    public MsgType getMsgType() {
+        return msgType;
     }
 
     public String getInstrument() {
@@ -49,23 +49,8 @@ public class Request {
             return this;
         }
 
-        public RequestBuilder commandType(BrokerCommandType commandType) {
-            request.commandType = commandType;
-            return this;
-        }
-
-        public RequestBuilder instrument(String instrument) {
-            request.instrument = instrument;
-            return this;
-        }
-
-        public RequestBuilder quantity(int quantity) {
-            request.quantity = quantity;
-            return this;
-        }
-
-        public RequestBuilder price(int price) {
-            request.price = price;
+        public RequestBuilder msgType(MsgType msgType) {
+            request.msgType = msgType;
             return this;
         }
 
@@ -74,6 +59,20 @@ public class Request {
             return this;
         }
 
+        public RequestBuilder instrument(String instrument) {
+            request.instrument = instrument;
+            return this;
+        }
+
+        public RequestBuilder price(int price) {
+            request.price = price;
+            return this;
+        }
+
+        public RequestBuilder quantity(int quantity) {
+            request.quantity = quantity;
+            return this;
+        }            
         public Request build() {
             return request;
         }
@@ -81,8 +80,7 @@ public class Request {
 
     @Override
     public String toString() {
-        return "Request [command=" + command + ", commandType=" + commandType + ", instrument="
-                + instrument + ", quantity=" + quantity + ", price=" + price + ", market=" + market
-                + "]";
+        return "Request [command=" + command + ", msgType=" + msgType + ", instrument=" + instrument
+                + ", quantity=" + quantity + ", price=" + price + ", market=" + market + "]";
     }
 }

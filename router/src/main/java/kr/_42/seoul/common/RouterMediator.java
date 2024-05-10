@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kr._42.seoul.FIXMessage;
 import kr._42.seoul.broker.BrokerRouter;
+import kr._42.seoul.enums.MsgType;
 import kr._42.seoul.field.Tag;
 import kr._42.seoul.market.MarketRouter;
 import kr._42.seoul.validator.BrokerRoutingValidator;
@@ -12,14 +13,14 @@ import kr._42.seoul.validator.ChecksumValidator;
 import kr._42.seoul.validator.MarketRoutingValidator;
 import kr._42.seoul.validator.Validator;
 
-public class Mediator {
-    private static final Logger logger = LoggerFactory.getLogger(Mediator.class);
+public class RouterMediator {
+    private static final Logger logger = LoggerFactory.getLogger(RouterMediator.class);
     private BrokerRouter brokerRouter;
     private MarketRouter marketRouter;
     private Validator brokerValidator;
     private Validator marketValidator;
 
-    public Mediator() {
+    public RouterMediator() {
         Validator brokerRoutingValidator = new BrokerRoutingValidator();
         Validator brokerChecksumValidator = new ChecksumValidator();
         brokerChecksumValidator.setNextValidator(brokerRoutingValidator);
@@ -33,7 +34,7 @@ public class Mediator {
 
     public void registerBrokerRouter(BrokerRouter brokerRouter) {
         this.brokerRouter = brokerRouter;
-        brokerRouter.registerMediator(this);
+        brokerRouter.registerRouterMediator(this);
     }
 
     public void registerMarketRouter(MarketRouter marketRouter) {
@@ -51,6 +52,7 @@ public class Mediator {
         String marketID = (String) message.get(Tag.MARKET).getValue();
         marketRouter.sendToMarket(byteBuffer, marketID);
     }
+
     public void sendToBrokerRouter(ByteBuffer byteBuffer) {
         if (this.marketValidator.validate(byteBuffer) == false) {
             this.sendToMarketInvalidMessage(byteBuffer);
@@ -65,8 +67,7 @@ public class Mediator {
     private void sendToBrokerInvalidMessage(ByteBuffer byteBuffer) {
         FIXMessage fixMessage = new FIXMessage(byteBuffer);
         String brokerID = (String) fixMessage.get(Tag.ID).getValue();
-        ByteBuffer invalidMessage = FIXMessage.builder().msgType("INVALID").build()
-                .toByteBuffer();
+        ByteBuffer invalidMessage = FIXMessage.builder().msgType(MsgType.INVALID).build().toByteBuffer();
         brokerRouter.sendToBroker(invalidMessage, brokerID);
 
         logger.info("Sending invalid message to broker client: {}", brokerID);
@@ -76,8 +77,7 @@ public class Mediator {
     private void sendToMarketInvalidMessage(ByteBuffer byteBuffer) {
         FIXMessage fixMessage = new FIXMessage(byteBuffer);
         String marketID = (String) fixMessage.get(Tag.ID).getValue();
-        ByteBuffer invalidMessage = FIXMessage.builder().msgType("INVALID").build()
-                .toByteBuffer();
+        ByteBuffer invalidMessage = FIXMessage.builder().msgType(MsgType.INVALID).build().toByteBuffer();
         marketRouter.sendToMarket(invalidMessage, marketID);
 
         logger.info("Sending invalid message to market client: {}", marketID);

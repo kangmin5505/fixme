@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import kr._42.seoul.ByteBufferHelper;
 import kr._42.seoul.ClientSocket;
 import kr._42.seoul.FIXMessage;
-import kr._42.seoul.enums.MarketMsgType;
+import kr._42.seoul.enums.MsgType;
 import kr._42.seoul.field.Tag;
 import kr._42.seoul.repository.Order;
 import kr._42.seoul.repository.Repository;
@@ -72,7 +72,7 @@ public class Market extends ClientSocket {
         FIXMessage message = new FIXMessage(byteBuffer);
         String msgType = (String) message.get(Tag.MSG_TYPE).getValue();
 
-        if (MarketMsgType.BUY.toString().equals(msgType)) {
+        if (MsgType.BUY.toString().equals(msgType)) {
             this.handleBuy(key, message);
         } else {
             this.handleSell(key, message);
@@ -98,7 +98,7 @@ public class Market extends ClientSocket {
                         this.repository.updateOrder(order);
                     }
 
-                    FIXMessage response = FIXMessage.builder().id(id).msgType(MarketMsgType.EXECUTED.toString())
+                    FIXMessage response = FIXMessage.builder().id(id).msgType(MsgType.EXECUTED)
                             .brokerID(order.getBrokerID()).instrument(instrument).quantity(quantity).price(price).build();
                     key.attach(response.toByteBuffer().array());
                     key.interestOps(SelectionKey.OP_WRITE);
@@ -131,7 +131,7 @@ public class Market extends ClientSocket {
         FIXMessage message = new FIXMessage(byteBuffer);
         String brokerID = (String) message.get(Tag.ID).getValue();
         FIXMessage invalidMessage = FIXMessage.builder().id(id)
-                .msgType(MarketMsgType.REJECTED.toString()).brokerID(brokerID).build();
+                .msgType(MsgType.REJECTED).brokerID(brokerID).build();
 
         key.attach(invalidMessage.toByteBuffer().array());
         key.interestOps(SelectionKey.OP_WRITE);

@@ -1,44 +1,61 @@
 package kr._42.seoul.client;
 
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.Queue;
+import kr._42.seoul.BrokerMediator;
 import kr._42.seoul.common.Request;
 import kr._42.seoul.common.Response;
-import kr._42.seoul.server.BrokerServer;
+import kr._42.seoul.enums.BrokerCommand;
 
 public class BrokerClient {
-    private final BrokerServer brokerServer;
     private final RequestHandler requestHandler;
     private final ResponseHandler responseHandler;
+    private BrokerMediator brokerMediator;
+    private final Queue<Response> queue = new LinkedList<>();
 
-    public BrokerClient(BrokerServer brokerServer, RequestHandler requestHandler,
+    public BrokerClient(RequestHandler requestHandler,
             ResponseHandler responseHandler) {
-        this.brokerServer = brokerServer;
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
     }
 
+    public void registerBrokerMediator(BrokerMediator brokerMediator) {
+        this.brokerMediator = brokerMediator;
+    }
+
     public void run() {
         while (true) {
+            if (this.queue.isEmpty() == false) {
+                handleResponse();
+            }
+
             try {
                 Request request = requestHandler.getRequest();
-
-                switch (request.getCommand()) {
-                    case ORDER:
-                        brokerServer.order(request);
-                        break;
-                    case QUERY:
-                        Response response = brokerServer.query(request);
-                        responseHandler.handle(response);
-                        break;
-                    case EXIT:
-                        System.exit(0);
+                BrokerCommand command = request.getCommand();
+                
+                if (command == BrokerCommand.ORDER) {
+                    brokerMediator.sendToBrokerServer(request);
+                } else if (command == BrokerCommand.EXIT) {
+                    System.exit(0);
                 }
             } catch (NoSuchElementException e) { // EOF
                 System.exit(0);
             } catch (Exception e) {
-                responseHandler.error("Fail to request: " + e.getMessage());
+                responseHandler.error("[Failed to request]\n\t" + e.getMessage());
                 continue;
             }
         }
+    }
+
+    public void handleResponse() {
+        while (this.queue.isEmpty() == false) {
+            Response response = this.queue.poll();
+            responseHandler.handle(response);
+        }
+    }
+
+    public void receive(Response response) {
+        this.queue.add(response);
     }
 }

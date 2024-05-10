@@ -1,11 +1,11 @@
 package kr._42.seoul.client;
 
 import kr._42.seoul.enums.BrokerCommand;
-import kr._42.seoul.enums.BrokerCommandType;
+import kr._42.seoul.enums.MsgType;
 
 public class ConsoleParser {
     private BrokerCommand command;
-    private BrokerCommandType commandType;
+    private MsgType msgType;
     private String market;
     private String instrument;
     private int price;
@@ -31,22 +31,11 @@ public class ConsoleParser {
         switch (command) {
             case ORDER:
                 return parseOrder(split);
-            case QUERY:
-                return parseQuery(split);
             case EXIT:
                 return parseExit(split);
             default:
                 throw new IllegalArgumentException("Command not found");
         }
-    }
-
-    private static ConsoleParser parseQuery(String[] split) {
-        if (split.length < 2) {
-            throw new IllegalArgumentException("Arguments must be more than 2");
-        }
-
-        return ConsoleParser.builder().command(BrokerCommand.QUERY)
-                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).build();
     }
 
     private static ConsoleParser parseExit(String[] split) {
@@ -65,16 +54,16 @@ public class ConsoleParser {
         }
 
         return ConsoleParser.builder().command(BrokerCommand.ORDER)
-                .commandType(BrokerCommandType.valueOf(split[1].toUpperCase())).market(split[2]).instrument(split[3].toUpperCase())
-                .price(price).quantity(quantity).build();
+                .msgType(MsgType.valueOf(split[1].toUpperCase())).market(split[2])
+                .instrument(split[3].toUpperCase()).price(price).quantity(quantity).build();
     }
 
     public BrokerCommand getCommand() {
         return this.command;
     }
 
-    public BrokerCommandType getCommandType() {
-        return this.commandType;
+    public MsgType getMsgType() {
+        return this.msgType;
     }
 
     public String getMarket() {
@@ -105,8 +94,8 @@ public class ConsoleParser {
             return this;
         }
 
-        private ConsoleParserBuilder commandType(BrokerCommandType commandType) {
-            consoleParser.commandType = commandType;
+        private ConsoleParserBuilder msgType(MsgType msgType) {
+            consoleParser.msgType = msgType;
             return this;
         }
 
@@ -137,8 +126,8 @@ public class ConsoleParser {
 
     @Override
     public String toString() {
-        return "ConsoleParser [command=" + command + ", commandType=" + commandType + ", market="
-                + market + ", instrument=" + instrument + ", quantity=" + quantity + ", price="
-                + price + "]";
+        return "ConsoleParser [command=" + command + ", msgType=" + msgType + ", market=" + market
+                + ", instrument=" + instrument + ", price=" + price + ", quantity=" + quantity
+                + "]";
     }
 }
